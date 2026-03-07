@@ -1,0 +1,439 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import {
+  mergePdfFiles,
+  type MergeOutputPageSize
+} from "@/lib/pdf/merge-pdf-files";
+import {
+  trackDownloadGenerated,
+  trackFileUploaded,
+  trackToolUsed,
+  trackEvent
+} from "@/lib/analytics";
+import {
+  formatFileLimit,
+  isFileTooLarge
+} from "@/lib/upload-constraints";
+
+GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+
+type UploadItem = {
+  id: string;
+  file: File;
+  previewDataUrl: string;
+  pageCount: number;
+};
+
+function isPdfFile(file: File) {
+  return (
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+  );
+}
+
+function createItemId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function formatMb(bytes: number) {
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+async function createPdfPreview(file: File): Promise<{ previewDataUrl: string; pageCount: number }> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const loadingTask = getDocument({ data: bytes });
+  const pdf = await loadingTask.promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 0.35 });
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { alpha: false });
+
+  if (!context) {
+    throw new Error("Canvas 2D context unavailable");
+  }
+
+  canvas.width = Math.max(1, Math.floor(viewport.width));
+  canvas.height = Math.max(1, Math.floor(viewport.height));
+
+  await page.render({ canvasContext: context, viewport }).promise;
+
+  const previewDataUrl = canvas.toDataURL("image/jpeg", 0.82);
+  const pageCount = pdf.numPages;
+
+  canvas.width = 0;
+  canvas.height = 0;
+
+  return { previewDataUrl, pageCount };
+}
+
+export function MergePdfTool() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [items, setItems] = useState<UploadItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
+  const [outputPageSize, setOutputPageSize] =
+    useState<MergeOutputPageSize>("a4");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  const handleFiles = async (incomingFiles: File[]) => {
+    const tooLargeFiles = incomingFiles.filter((file) => isFileTooLarge(file));
+    const validFiles = incomingFiles.filter(
+      (file) => isPdfFile(file) && !isFileTooLarge(file)
+    );
+    const invalidFiles = incomingFiles.filter((file) => !isPdfFile(file));
+
+    if (invalidFiles.length > 0 || tooLargeFiles.length > 0) {
+      const invalidNames = invalidFiles.map((file) => file.name);
+      const tooLargeNames = tooLargeFiles.map((file) => file.name);
+      const reasons: string[] = [];
+      if (invalidNames.length > 0) {
+        reasons.push(`Only PDF files are allowed. Invalid: ${invalidNames.join(", ")}`);
+      }
+      if (tooLargeNames.length > 0) {
+        reasons.push(`Max file size is ${formatFileLimit()}. Too large: ${tooLargeNames.join(", ")}`);
+      }
+      setError(reasons.join(" "));
+    } else {
+      setError(null);
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    setIsProcessingFiles(true);
+    setSuccessMessage(null);
+
+    try {
+      const preparedItems = await Promise.all(
+        validFiles.map(async (file) => {
+          const { previewDataUrl, pageCount } = await createPdfPreview(file);
+          return {
+            id: createItemId(),
+            file,
+            previewDataUrl,
+            pageCount
+          } satisfies UploadItem;
+        })
+      );
+
+      setItems((currentItems) => [...currentItems, ...preparedItems]);
+      trackFileUploaded("merge_pdf", preparedItems.length);
+    } catch {
+      setError("One or more PDF files could not be previewed. Please try different files.");
+    } finally {
+      setIsProcessingFiles(false);
+    }
+  };
+
+  const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    void handleFiles(selectedFiles);
+    event.target.value = "";
+  };
+
+  const onDrop = (event: React.DragEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    void handleFiles(droppedFiles);
+  };
+
+  const reorderByIds = (sourceId: string, targetId: string) => {
+    setItems((currentItems) => {
+      const sourceIndex = currentItems.findIndex((item) => item.id === sourceId);
+      const targetIndex = currentItems.findIndex((item) => item.id === targetId);
+
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+        return currentItems;
+      }
+
+      const updatedItems = [...currentItems];
+      const [movedItem] = updatedItems.splice(sourceIndex, 1);
+      updatedItems.splice(targetIndex, 0, movedItem);
+      return updatedItems;
+    });
+  };
+
+  const removeFile = (id: string) => {
+    setItems((currentItems) => currentItems.filter((item) => item.id !== id));
+  };
+
+  const onMerge = async () => {
+    if (items.length === 0) {
+      setError("Please add PDF files before merging.");
+      return;
+    }
+
+    setIsMerging(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const files = items.map((item) => item.file);
+      const mergedPdfBlob = await mergePdfFiles(files, {
+        outputPageSize
+      });
+      const downloadUrl = URL.createObjectURL(mergedPdfBlob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "merged.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      setSuccessMessage(
+        `Done. Merged ${items.length} PDF file${
+          items.length > 1 ? "s" : ""
+        } (${formatMb(mergedPdfBlob.size)}).`
+      );
+      trackToolUsed("merge_pdf");
+      trackDownloadGenerated("merge_pdf", "pdf");
+      trackEvent("merge_pdf_complete", {
+        file_count: items.length,
+        output_size: mergedPdfBlob.size,
+        output_page_size: outputPageSize
+      });
+    } catch {
+      setError("Merge failed. Please try again with smaller or valid PDF files.");
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,application/pdf"
+        onChange={onFileInputChange}
+        className="hidden"
+      />
+
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={onDrop}
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-10 text-center transition ${
+          isDragging
+            ? "border-brand-600 bg-brand-50"
+            : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
+        }`}
+      >
+        <span className="block text-base font-medium text-slate-700">
+          {items.length === 0
+            ? "Drag and drop PDF files here, or click to upload."
+            : "Add more PDF files"}
+        </span>
+        <span className="mt-2 block text-xs text-slate-500">
+          You can drop files again at any time to append more PDFs.
+        </span>
+      </button>
+
+      {isProcessingFiles ? (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          Processing PDF previews...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-4 flex items-start justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="shrink-0 rounded-md border border-red-300 px-2 py-1 text-xs font-medium hover:bg-red-100"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
+
+      {successMessage ? (
+        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {successMessage}
+        </div>
+      ) : null}
+
+      <div className={`mt-4 grid gap-4 ${items.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_340px]" : "grid-cols-1"}`}>
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-slate-900">Files ({items.length})</h2>
+            {items.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setItems([]);
+                  setSuccessMessage(null);
+                }}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+              >
+                Clear all
+              </button>
+            ) : null}
+          </div>
+
+          {items.length === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Upload PDF files to start. You can drag cards to set the final merge order.
+            </p>
+          ) : (
+            <>
+              <div className="mb-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 sm:text-sm">
+                <span className="font-medium">{items.length} PDF{items.length === 1 ? "" : "s"}</span>
+                <span className="mx-2 text-slate-400">•</span>
+                <span>
+                  {formatMb(items.reduce((sum, item) => sum + item.file.size, 0))} total
+                </span>
+                <span className="mx-2 text-slate-400">•</span>
+                <span>Final merge order follows card order.</span>
+              </div>
+              <ul className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+                {items.map((item, index) => (
+                  <li
+                    key={item.id}
+                    draggable
+                    onDragStart={(event) => {
+                      setDraggingId(item.id);
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", item.id);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setDragOverId(item.id);
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const sourceId = draggingId ?? event.dataTransfer.getData("text/plain");
+                      if (sourceId) {
+                        reorderByIds(sourceId, item.id);
+                      }
+                      setDragOverId(null);
+                      setDraggingId(null);
+                    }}
+                    onDragEnd={() => {
+                      setDragOverId(null);
+                      setDraggingId(null);
+                    }}
+                    className={`rounded-lg border bg-white p-2.5 transition ${
+                      draggingId === item.id
+                        ? "border-brand-600 bg-brand-50/70 shadow-sm opacity-90"
+                        : dragOverId === item.id
+                          ? "border-brand-500 bg-brand-50 ring-1 ring-brand-300"
+                          : "border-slate-200"
+                    } ${draggingId === item.id ? "cursor-grabbing" : "cursor-grab"}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+                        #{index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(item.id)}
+                        className="rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="mt-2 overflow-hidden rounded border border-slate-200 bg-slate-50 p-1.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.previewDataUrl}
+                        alt={`Preview of ${item.file.name}`}
+                        className="mx-auto h-36 w-full object-contain"
+                      />
+                    </div>
+
+                    <p className="mt-2 truncate text-sm font-medium text-slate-900">
+                      {item.file.name}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {item.pageCount} page{item.pageCount === 1 ? "" : "s"} · {formatMb(item.file.size)}
+                    </p>
+                    <p className="mt-1.5 text-xs text-slate-500">
+                      Drag this card to reorder merge position.
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3">
+          <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/70 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                Optional
+              </span>
+              <h3 className="text-sm font-semibold text-slate-900">
+                Make all pages the same size
+              </h3>
+            </div>
+
+            <p className="mb-3 text-xs text-slate-700 sm:text-sm">
+              Normalize merged pages to A4 or Letter for cleaner printing and a consistent layout.
+              Keeps proportions, no distortion.
+            </p>
+
+            <label className="text-sm text-slate-700">
+              <span className="mb-1 block font-medium">Output page size</span>
+              <select
+                value={outputPageSize}
+                onChange={(event) =>
+                  setOutputPageSize(event.target.value as MergeOutputPageSize)
+                }
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand-500"
+              >
+                <option value="original">Keep original page sizes</option>
+                <option value="a4">Normalize to A4 (best for printing)</option>
+                <option value="letter">Normalize to Letter</option>
+              </select>
+            </label>
+
+            {outputPageSize !== "original" ? (
+              <p className="mt-2 text-xs font-medium text-brand-800">
+                All merged pages will be normalized to {outputPageSize === "a4" ? "A4" : "Letter"}.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={onMerge}
+              disabled={isMerging || items.length === 0 || isProcessingFiles}
+              className="inline-flex w-full max-w-[320px] items-center justify-center rounded-xl bg-brand-600 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isMerging
+                ? "Merging PDFs..."
+                : `Merge ${items.length > 0 ? items.length : ""} PDF${items.length === 1 ? "" : "s"}`}
+            </button>
+          </div>
+          <p className="mt-2 text-center text-sm text-slate-600">
+            Final merge order follows the card order shown above.
+          </p>
+        </aside>
+      </div>
+    </section>
+  );
+}
