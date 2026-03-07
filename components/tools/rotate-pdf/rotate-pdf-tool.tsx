@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   getPdfPageCount,
   rotatePdfFile,
@@ -9,6 +9,7 @@ import {
   type RotationStep
 } from "@/lib/pdf/rotate-pdf-file";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
+import { useTranslation } from "@/components/i18n-provider";
 
 GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
@@ -19,9 +20,7 @@ type PagePreview = {
 };
 
 function isPdfFile(file: File) {
-  return (
-    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
-  );
+  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
 
 function formatMb(bytes: number) {
@@ -69,6 +68,7 @@ async function generatePdfPreviews(file: File): Promise<PagePreview[]> {
 const ROTATION_OPTIONS: RotationStep[] = [90, 180, 270];
 
 export function RotatePdfTool() {
+  const { language } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
@@ -80,6 +80,57 @@ export function RotatePdfTool() {
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
 
+  const copy =
+    language === "es"
+      ? {
+          replaceFile: "Reemplazar archivo PDF",
+          selectOrDrop: "Selecciona PDF o sueltalo aqui",
+          filePreview: "Vista del archivo",
+          loading: "Cargando detalles y vista previa del PDF...",
+          noFile: "Aun no hay archivo agregado.",
+          page: "pagina",
+          pages: "paginas",
+          pageAlt: (page: number) => `Pagina PDF ${page}`,
+          options: "Opciones de rotacion",
+          currentRotation: (deg: number) => `Rotacion actual: ${deg} grados`,
+          rotateBy: (deg: number) => `+${deg} grados en sentido horario`,
+          rotateBusy: "Rotando...",
+          rotateCta: "Rotar PDF",
+          clear: "Limpiar",
+          invalid: (name: string) => `Solo se permiten PDF. Invalido: ${name}`,
+          tooLarge: (name: string) => `Tamano maximo ${formatFileLimit()}. Muy grande: ${name}`,
+          singleFile: "Sube un solo PDF por vez.",
+          readFailed: "No se pudo leer este PDF. Prueba con un archivo valido.",
+          uploadFirst: "Sube un PDF antes de rotar.",
+          rotationFailed: "La rotacion fallo. Prueba con otro PDF.",
+          success: (count: number | null, deg: number, name: string) =>
+            `Listo. Se rotaron ${count ?? "todas"} ${count === 1 ? "pagina" : "paginas"} ${deg} grados y se descargo ${name}.`
+        }
+      : {
+          replaceFile: "Replace PDF file",
+          selectOrDrop: "Select PDF or drop it here",
+          filePreview: "File preview",
+          loading: "Loading PDF details and preview...",
+          noFile: "No file added yet.",
+          page: "page",
+          pages: "pages",
+          pageAlt: (page: number) => `PDF page ${page}`,
+          options: "Rotate options",
+          currentRotation: (deg: number) => `Current rotation: ${deg} degrees`,
+          rotateBy: (deg: number) => `+${deg} degrees clockwise`,
+          rotateBusy: "Rotating...",
+          rotateCta: "Rotate PDF",
+          clear: "Clear",
+          invalid: (name: string) => `Only PDF files are allowed. Invalid file: ${name}`,
+          tooLarge: (name: string) => `Max file size is ${formatFileLimit()}. Too large: ${name}`,
+          singleFile: "Please upload one PDF file at a time.",
+          readFailed: "Could not read this PDF file. Please try a valid PDF.",
+          uploadFirst: "Please upload a PDF file before rotating.",
+          rotationFailed: "Rotation failed. Please try another PDF file.",
+          success: (count: number | null, deg: number, name: string) =>
+            `Done. Rotated ${count ?? "all"} ${count === 1 ? "page" : "pages"} by ${deg} degrees and downloaded ${name}.`
+        };
+
   const handleIncomingFiles = async (incomingFiles: File[]) => {
     if (incomingFiles.length === 0) {
       return;
@@ -88,12 +139,12 @@ export function RotatePdfTool() {
     const selectedFile = incomingFiles[0];
 
     if (!isPdfFile(selectedFile)) {
-      setError(`Only PDF files are allowed. Invalid file: ${selectedFile.name}`);
+      setError(copy.invalid(selectedFile.name));
       return;
     }
 
     if (isFileTooLarge(selectedFile)) {
-      setError(`Max file size is ${formatFileLimit()}. Too large: ${selectedFile.name}`);
+      setError(copy.tooLarge(selectedFile.name));
       return;
     }
 
@@ -113,13 +164,13 @@ export function RotatePdfTool() {
       setCurrentRotation(0);
 
       if (incomingFiles.length > 1) {
-        setError("Please upload one PDF file at a time.");
+        setError(copy.singleFile);
       }
     } catch {
       setFile(null);
       setPageCount(null);
       setPagePreviews([]);
-      setError("Could not read this PDF file. Please try a valid PDF.");
+      setError(copy.readFailed);
     } finally {
       setIsLoadingPdf(false);
     }
@@ -127,7 +178,7 @@ export function RotatePdfTool() {
 
   const onRotate = async () => {
     if (!file) {
-      setError("Please upload a PDF file before rotating.");
+      setError(copy.uploadFirst);
       return;
     }
 
@@ -148,20 +199,16 @@ export function RotatePdfTool() {
       link.remove();
       URL.revokeObjectURL(url);
 
-      setSuccessMessage(
-        `Done. Rotated ${pageCount ?? "all"} page${
-          pageCount === 1 ? "" : "s"
-        } by ${currentRotation}° and downloaded ${outputName}.`
-      );
+      setSuccessMessage(copy.success(pageCount, currentRotation, outputName));
     } catch {
-      setError("Rotation failed. Please try another PDF file.");
+      setError(copy.rotationFailed);
     } finally {
       setIsRotating(false);
     }
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <input
         ref={fileInputRef}
         type="file"
@@ -186,14 +233,14 @@ export function RotatePdfTool() {
           setIsDragging(false);
           void handleIncomingFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-7 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
         }`}
       >
         <span className="block text-sm font-semibold text-slate-700">
-          {file ? "Replace PDF file" : "Select PDF or drop it here"}
+          {file ? copy.replaceFile : copy.selectOrDrop}
         </span>
       </button>
 
@@ -209,19 +256,19 @@ export function RotatePdfTool() {
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <h2 className="text-sm font-semibold text-slate-900">File preview</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.filePreview}</h2>
           <p className="mt-1 text-xs text-slate-600">
             {isLoadingPdf
-              ? "Loading PDF details and preview..."
+              ? copy.loading
               : file
-                ? `${file.name} · ${pageCount ?? "-"} page${pageCount === 1 ? "" : "s"} · ${formatMb(file.size)}`
-                : "No file added yet."}
+                ? `${file.name} - ${pageCount ?? "-"} ${pageCount === 1 ? copy.page : copy.pages} - ${formatMb(file.size)}`
+                : copy.noFile}
           </p>
 
           {pagePreviews.length > 0 ? (
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
               {pagePreviews.map((preview) => (
                 <div
                   key={`${file?.name ?? "pdf"}-${file?.lastModified ?? 0}-${preview.pageNumber}-${currentRotation}`}
@@ -231,7 +278,7 @@ export function RotatePdfTool() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={preview.thumbnailDataUrl}
-                      alt={`PDF page ${preview.pageNumber}`}
+                      alt={copy.pageAlt(preview.pageNumber)}
                       style={{
                         transform: `rotate(${currentRotation}deg)`,
                         transformOrigin: "center center"
@@ -240,7 +287,7 @@ export function RotatePdfTool() {
                     />
                   </div>
                   <p className="mt-1.5 text-center text-[11px] font-medium text-slate-700">
-                    Page {preview.pageNumber}
+                    {copy.page} {preview.pageNumber}
                   </p>
                 </div>
               ))}
@@ -249,8 +296,8 @@ export function RotatePdfTool() {
         </section>
 
         <aside className="rounded-xl border border-slate-200 bg-white p-3">
-          <h2 className="text-sm font-semibold text-slate-900">Rotate options</h2>
-          <p className="mt-1 text-xs text-slate-600">Current rotation: {currentRotation}°</p>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.options}</h2>
+          <p className="mt-1 text-xs text-slate-600">{copy.currentRotation(currentRotation)}</p>
 
           <div className="mt-3 space-y-2">
             {ROTATION_OPTIONS.map((angle) => (
@@ -258,13 +305,11 @@ export function RotatePdfTool() {
                 key={angle}
                 type="button"
                 onClick={() => {
-                  setCurrentRotation(
-                    (previous) => (((previous + angle) % 360) as RotationAngle)
-                  );
+                  setCurrentRotation((previous) => (((previous + angle) % 360) as RotationAngle));
                 }}
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:bg-white"
               >
-                +{angle}° clockwise
+                {copy.rotateBy(angle)}
               </button>
             ))}
           </div>
@@ -276,7 +321,7 @@ export function RotatePdfTool() {
               disabled={!file || isRotating || isLoadingPdf}
               className="inline-flex flex-1 items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isRotating ? "Rotating..." : "Rotate PDF"}
+              {isRotating ? copy.rotateBusy : copy.rotateCta}
             </button>
 
             {file ? (
@@ -292,7 +337,7 @@ export function RotatePdfTool() {
                 }}
                 className="rounded-md border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
               >
-                Clear
+                {copy.clear}
               </button>
             ) : null}
           </div>

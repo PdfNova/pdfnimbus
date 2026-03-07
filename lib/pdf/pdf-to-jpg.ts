@@ -1,4 +1,4 @@
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
@@ -63,3 +63,4 @@ export async function pdfToJpgFiles(file: File, quality = 0.92): Promise<Blob[]>
 
   return output;
 }
+

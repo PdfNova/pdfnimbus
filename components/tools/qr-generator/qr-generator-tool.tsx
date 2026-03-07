@@ -2,20 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
-import {
-  trackDownloadGenerated,
-  trackToolUsed,
-  trackEvent
-} from "@/lib/analytics";
+import { trackDownloadGenerated, trackToolUsed, trackEvent } from "@/lib/analytics";
+import { useTranslation } from "@/components/i18n-provider";
 
 type QrInputType = "url" | "text" | "wifi" | "email";
-
-const INPUT_TYPES: Array<{ value: QrInputType; label: string; hint: string }> = [
-  { value: "url", label: "URL", hint: "Generate a QR for links" },
-  { value: "text", label: "Text", hint: "Generate a QR for plain text" },
-  { value: "wifi", label: "WiFi", hint: "Share WiFi credentials quickly" },
-  { value: "email", label: "Email", hint: "Open compose with recipient/subject" }
-];
 
 function downloadDataUrl(dataUrl: string, filename: string) {
   const link = document.createElement("a");
@@ -85,6 +75,7 @@ function buildQrPayload({
 }
 
 export function QrGeneratorTool() {
+  const { language } = useTranslation();
   const [inputType, setInputType] = useState<QrInputType>("url");
 
   const [url, setUrl] = useState("https://");
@@ -105,6 +96,82 @@ export function QrGeneratorTool() {
   const [pngDataUrl, setPngDataUrl] = useState<string | null>(null);
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const copy =
+    language === "es"
+      ? {
+          previewTitle: "Vista previa QR",
+          previewAlt: "Vista previa QR",
+          previewHint: "La vista previa se actualiza al cambiar opciones.",
+          previewEmpty: "Ingresa datos para generar un codigo QR.",
+          downloadPng: "Descargar PNG",
+          downloadSvg: "Descargar SVG",
+          optionsTitle: "Opciones QR",
+          types: {
+            url: { label: "URL", hint: "Generar QR para enlaces" },
+            text: { label: "Texto", hint: "Generar QR para texto plano" },
+            wifi: { label: "WiFi", hint: "Compartir credenciales WiFi" },
+            email: { label: "Email", hint: "Abrir redaccion con destinatario/asunto" }
+          },
+          placeholders: {
+            url: "https://ejemplo.com",
+            text: "Escribe tu texto",
+            wifiSsid: "Nombre WiFi (SSID)",
+            wifiPassword: "Contrasena",
+            noPassword: "Sin contrasena",
+            hiddenNetwork: "Red oculta",
+            emailTo: "destinatario@ejemplo.com",
+            emailSubject: "Asunto",
+            emailBody: "Mensaje"
+          },
+          controls: {
+            size: "Tamano",
+            margin: "Margen",
+            fg: "Color frontal",
+            bg: "Color de fondo"
+          },
+          generationError: "No se pudo generar el QR. Revisa datos y opciones."
+        }
+      : {
+          previewTitle: "QR preview",
+          previewAlt: "QR preview",
+          previewHint: "Live preview updates as you change options.",
+          previewEmpty: "Enter input to generate a QR code.",
+          downloadPng: "Download PNG",
+          downloadSvg: "Download SVG",
+          optionsTitle: "QR options",
+          types: {
+            url: { label: "URL", hint: "Generate a QR for links" },
+            text: { label: "Text", hint: "Generate a QR for plain text" },
+            wifi: { label: "WiFi", hint: "Share WiFi credentials quickly" },
+            email: { label: "Email", hint: "Open compose with recipient/subject" }
+          },
+          placeholders: {
+            url: "https://example.com",
+            text: "Enter your text",
+            wifiSsid: "WiFi name (SSID)",
+            wifiPassword: "Password",
+            noPassword: "No password",
+            hiddenNetwork: "Hidden network",
+            emailTo: "recipient@example.com",
+            emailSubject: "Subject",
+            emailBody: "Email body"
+          },
+          controls: {
+            size: "Size",
+            margin: "Margin",
+            fg: "Foreground color",
+            bg: "Background color"
+          },
+          generationError: "Could not generate QR. Check your input and options."
+        };
+
+  const inputTypes: Array<{ value: QrInputType; label: string; hint: string }> = [
+    { value: "url", label: copy.types.url.label, hint: copy.types.url.hint },
+    { value: "text", label: copy.types.text.label, hint: copy.types.text.hint },
+    { value: "wifi", label: copy.types.wifi.label, hint: copy.types.wifi.hint },
+    { value: "email", label: copy.types.email.label, hint: copy.types.email.hint }
+  ];
 
   const qrPayload = useMemo(
     () =>
@@ -166,7 +233,7 @@ export function QrGeneratorTool() {
         }
       } catch {
         if (!canceled) {
-          setError("Could not generate QR. Check your input and options.");
+          setError(copy.generationError);
           setPngDataUrl(null);
           setSvgContent(null);
         }
@@ -178,27 +245,27 @@ export function QrGeneratorTool() {
     return () => {
       canceled = true;
     };
-  }, [darkColor, lightColor, margin, qrPayload, size]);
+  }, [copy.generationError, darkColor, lightColor, margin, qrPayload, size]);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       {error ? (
         <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <h2 className="text-sm font-semibold text-slate-900">QR preview</h2>
-          <p className="mt-1 text-xs text-slate-600">Live preview updates as you change options.</p>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.previewTitle}</h2>
+          <p className="mt-1 text-xs text-slate-600">{copy.previewHint}</p>
 
-          <div className="mt-3 flex min-h-[360px] items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
+          <div className="mt-3 flex min-h-[340px] items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
             {pngDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={pngDataUrl} alt="QR preview" className="h-auto w-full max-w-[340px] object-contain" />
+              <img src={pngDataUrl} alt={copy.previewAlt} className="h-auto w-full max-w-[340px] object-contain" />
             ) : (
-              <p className="text-sm text-slate-500">Enter input to generate a QR code.</p>
+              <p className="text-sm text-slate-500">{copy.previewEmpty}</p>
             )}
           </div>
 
@@ -215,7 +282,7 @@ export function QrGeneratorTool() {
               }}
               className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Download PNG
+              {copy.downloadPng}
             </button>
 
             <button
@@ -230,16 +297,16 @@ export function QrGeneratorTool() {
               }}
               className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Download SVG
+              {copy.downloadSvg}
             </button>
           </div>
         </section>
 
         <aside className="rounded-xl border border-slate-200 bg-white p-3">
-          <h2 className="text-sm font-semibold text-slate-900">QR options</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.optionsTitle}</h2>
 
           <div className="mt-3 grid gap-2">
-            {INPUT_TYPES.map((type) => (
+            {inputTypes.map((type) => (
               <button
                 key={type.value}
                 type="button"
@@ -261,7 +328,7 @@ export function QrGeneratorTool() {
               <input
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
-                placeholder="https://example.com"
+                placeholder={copy.placeholders.url}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
               />
             ) : null}
@@ -270,7 +337,7 @@ export function QrGeneratorTool() {
               <textarea
                 value={text}
                 onChange={(event) => setText(event.target.value)}
-                placeholder="Enter your text"
+                placeholder={copy.placeholders.text}
                 rows={4}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
               />
@@ -281,13 +348,13 @@ export function QrGeneratorTool() {
                 <input
                   value={wifiSsid}
                   onChange={(event) => setWifiSsid(event.target.value)}
-                  placeholder="WiFi name (SSID)"
+                  placeholder={copy.placeholders.wifiSsid}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
                 />
                 <input
                   value={wifiPassword}
                   onChange={(event) => setWifiPassword(event.target.value)}
-                  placeholder="Password"
+                  placeholder={copy.placeholders.wifiPassword}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
                 />
                 <div className="flex items-center gap-2">
@@ -298,7 +365,7 @@ export function QrGeneratorTool() {
                   >
                     <option value="WPA">WPA</option>
                     <option value="WEP">WEP</option>
-                    <option value="nopass">No password</option>
+                    <option value="nopass">{copy.placeholders.noPassword}</option>
                   </select>
                   <label className="flex items-center gap-1 text-xs text-slate-700">
                     <input
@@ -306,7 +373,7 @@ export function QrGeneratorTool() {
                       checked={wifiHidden}
                       onChange={(event) => setWifiHidden(event.target.checked)}
                     />
-                    Hidden network
+                    {copy.placeholders.hiddenNetwork}
                   </label>
                 </div>
               </div>
@@ -317,19 +384,19 @@ export function QrGeneratorTool() {
                 <input
                   value={emailTo}
                   onChange={(event) => setEmailTo(event.target.value)}
-                  placeholder="recipient@example.com"
+                  placeholder={copy.placeholders.emailTo}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
                 />
                 <input
                   value={emailSubject}
                   onChange={(event) => setEmailSubject(event.target.value)}
-                  placeholder="Subject"
+                  placeholder={copy.placeholders.emailSubject}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
                 />
                 <textarea
                   value={emailBody}
                   onChange={(event) => setEmailBody(event.target.value)}
-                  placeholder="Email body"
+                  placeholder={copy.placeholders.emailBody}
                   rows={3}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-brand-500"
                 />
@@ -339,7 +406,7 @@ export function QrGeneratorTool() {
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <label className="text-xs font-semibold text-slate-700">
-              Size
+              {copy.controls.size}
               <input
                 type="number"
                 min={160}
@@ -351,7 +418,7 @@ export function QrGeneratorTool() {
               />
             </label>
             <label className="text-xs font-semibold text-slate-700">
-              Margin
+              {copy.controls.margin}
               <input
                 type="number"
                 min={0}
@@ -363,7 +430,7 @@ export function QrGeneratorTool() {
               />
             </label>
             <label className="text-xs font-semibold text-slate-700">
-              Foreground color
+              {copy.controls.fg}
               <input
                 type="color"
                 value={darkColor}
@@ -372,7 +439,7 @@ export function QrGeneratorTool() {
               />
             </label>
             <label className="text-xs font-semibold text-slate-700">
-              Background color
+              {copy.controls.bg}
               <input
                 type="color"
                 value={lightColor}

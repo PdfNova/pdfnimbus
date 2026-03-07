@@ -10,6 +10,7 @@ import {
   trackEvent
 } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
+import { useTranslation } from "@/components/i18n-provider";
 
 type CompressionLevel = "low" | "recommended" | "extreme";
 
@@ -23,29 +24,21 @@ type ImageItem = {
 
 const LEVEL_OPTIONS: Array<{
   value: CompressionLevel;
-  label: string;
-  hint: string;
   quality: number;
   maxWidthOrHeight: number;
 }> = [
   {
     value: "low",
-    label: "Low",
-    hint: "Higher quality with lighter size reduction.",
     quality: 0.85,
     maxWidthOrHeight: 2400
   },
   {
     value: "recommended",
-    label: "Recommended",
-    hint: "Best balance for most images.",
     quality: 0.7,
     maxWidthOrHeight: 2000
   },
   {
     value: "extreme",
-    label: "Extreme",
-    hint: "Strongest reduction, lower quality.",
     quality: 0.5,
     maxWidthOrHeight: 1600
   }
@@ -84,11 +77,61 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export function CompressImageTool() {
+  const { language } = useTranslation();
   const [items, setItems] = useState<ImageItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [level, setLevel] = useState<CompressionLevel>("recommended");
+
+  const copy =
+    language === "es"
+      ? {
+          uploadMore: "Agregar mas imagenes",
+          uploadFirst: "Selecciona imagenes o sueltalas aqui",
+          imagePreview: "Vista de imagenes",
+          noImages: "Aun no hay imagenes cargadas.",
+          original: "Original",
+          compressed: "Comprimido",
+          saved: "ahorrado",
+          options: "Opciones de compresion",
+          levels: {
+            low: { label: "Baja", hint: "Mayor calidad con reduccion ligera." },
+            recommended: { label: "Recomendada", hint: "Mejor equilibrio para la mayoria de imagenes." },
+            extreme: { label: "Extrema", hint: "Reduccion maxima con menor calidad." }
+          },
+          compressBusy: "Comprimiendo imagenes...",
+          compressCta: "Comprimir imagenes",
+          downloadCta: "Descargar archivos comprimidos",
+          invalid: (names: string) => `Solo se permiten imagenes. Invalidos: ${names}`,
+          tooLarge: (names: string) => `Tamano maximo ${formatFileLimit()}. Muy grandes: ${names}`,
+          uploadBefore: "Sube imagenes antes de comprimir.",
+          compressionFailed: "La compresion fallo. Prueba archivos mas pequenos u otro formato.",
+          downloadBefore: "Comprime primero antes de descargar."
+        }
+      : {
+          uploadMore: "Add more images",
+          uploadFirst: "Select images or drop them here",
+          imagePreview: "Image preview",
+          noImages: "No images uploaded yet.",
+          original: "Original",
+          compressed: "Compressed",
+          saved: "saved",
+          options: "Compression options",
+          levels: {
+            low: { label: "Low", hint: "Higher quality with lighter size reduction." },
+            recommended: { label: "Recommended", hint: "Best balance for most images." },
+            extreme: { label: "Extreme", hint: "Strongest reduction, lower quality." }
+          },
+          compressBusy: "Compressing images...",
+          compressCta: "Compress images",
+          downloadCta: "Download compressed files",
+          invalid: (names: string) => `Only image files are allowed. Invalid: ${names}`,
+          tooLarge: (names: string) => `Max file size is ${formatFileLimit()}. Too large: ${names}`,
+          uploadBefore: "Please upload images before compressing.",
+          compressionFailed: "Image compression failed. Try smaller files or another format.",
+          downloadBefore: "Compress images first before downloading."
+        };
 
   const selectedLevel = useMemo(
     () => LEVEL_OPTIONS.find((option) => option.value === level) ?? LEVEL_OPTIONS[1],
@@ -97,18 +140,16 @@ export function CompressImageTool() {
 
   const handleFiles = (incoming: File[]) => {
     const tooLarge = incoming.filter((file) => isFileTooLarge(file));
-    const valid = incoming.filter(
-      (file) => file.type.startsWith("image/") && !isFileTooLarge(file)
-    );
+    const valid = incoming.filter((file) => file.type.startsWith("image/") && !isFileTooLarge(file));
     const invalid = incoming.filter((file) => !file.type.startsWith("image/"));
 
     if (invalid.length > 0 || tooLarge.length > 0) {
       const messages: string[] = [];
       if (invalid.length > 0) {
-        messages.push(`Only image files are allowed. Invalid: ${invalid.map((f) => f.name).join(", ")}`);
+        messages.push(copy.invalid(invalid.map((f) => f.name).join(", ")));
       }
       if (tooLarge.length > 0) {
-        messages.push(`Max file size is ${formatFileLimit()}. Too large: ${tooLarge.map((f) => f.name).join(", ")}`);
+        messages.push(copy.tooLarge(tooLarge.map((f) => f.name).join(", ")));
       }
       setError(messages.join(" "));
     } else {
@@ -129,7 +170,7 @@ export function CompressImageTool() {
 
   const onCompress = async () => {
     if (items.length === 0) {
-      setError("Please upload images before compressing.");
+      setError(copy.uploadBefore);
       return;
     }
 
@@ -161,7 +202,7 @@ export function CompressImageTool() {
         level
       });
     } catch {
-      setError("Image compression failed. Try smaller files or another format.");
+      setError(copy.compressionFailed);
     } finally {
       setIsCompressing(false);
     }
@@ -170,7 +211,7 @@ export function CompressImageTool() {
   const onDownload = async () => {
     const ready = items.filter((item) => item.compressedBlob && item.compressedName);
     if (ready.length === 0) {
-      setError("Compress images first before downloading.");
+      setError(copy.downloadBefore);
       return;
     }
 
@@ -191,11 +232,9 @@ export function CompressImageTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       {error ? (
-        <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </div>
+        <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
       ) : null}
 
       <label
@@ -209,7 +248,7 @@ export function CompressImageTool() {
           setIsDragging(false);
           handleFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`mb-4 block cursor-pointer rounded-xl border-2 border-dashed px-4 py-7 text-center transition ${
+        className={`mb-4 block cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -226,17 +265,17 @@ export function CompressImageTool() {
           }}
         />
         <span className="block text-sm font-semibold text-slate-700">
-          {items.length > 0 ? "Add more images" : "Select images or drop them here"}
+          {items.length > 0 ? copy.uploadMore : copy.uploadFirst}
         </span>
       </label>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <h2 className="text-sm font-semibold text-slate-900">Image preview</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.imagePreview}</h2>
           {items.length === 0 ? (
-            <p className="mt-2 text-sm text-slate-600">No images uploaded yet.</p>
+            <p className="mt-2 text-sm text-slate-600">{copy.noImages}</p>
           ) : (
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => {
                 const original = item.file.size;
                 const compressed = item.compressedBlob?.size;
@@ -254,11 +293,11 @@ export function CompressImageTool() {
                     />
                     <p className="mt-2 truncate text-xs font-semibold text-slate-900">{item.file.name}</p>
                     <p className="mt-1 text-[11px] text-slate-600">
-                      Original: {formatSize(original)}
-                      {compressed ? ` · Compressed: ${formatSize(compressed)}` : ""}
+                      {copy.original}: {formatSize(original)}
+                      {compressed ? ` - ${copy.compressed}: ${formatSize(compressed)}` : ""}
                     </p>
                     {saved !== null ? (
-                      <p className="mt-1 text-[11px] font-semibold text-emerald-700">{saved}% saved</p>
+                      <p className="mt-1 text-[11px] font-semibold text-emerald-700">{saved}% {copy.saved}</p>
                     ) : null}
                   </li>
                 );
@@ -268,7 +307,7 @@ export function CompressImageTool() {
         </section>
 
         <aside className="rounded-xl border border-slate-200 bg-white p-3">
-          <h2 className="text-sm font-semibold text-slate-900">Compression options</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{copy.options}</h2>
           <div className="mt-3 space-y-2">
             {LEVEL_OPTIONS.map((option) => (
               <button
@@ -281,8 +320,8 @@ export function CompressImageTool() {
                     : "border-slate-200 bg-slate-50 hover:border-brand-400"
                 }`}
               >
-                <p className="text-sm font-semibold text-slate-900">{option.label}</p>
-                <p className="mt-1 text-xs text-slate-600">{option.hint}</p>
+                <p className="text-sm font-semibold text-slate-900">{copy.levels[option.value].label}</p>
+                <p className="mt-1 text-xs text-slate-600">{copy.levels[option.value].hint}</p>
               </button>
             ))}
           </div>
@@ -293,7 +332,7 @@ export function CompressImageTool() {
             disabled={isCompressing || items.length === 0}
             className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCompressing ? "Compressing images..." : "Compress images"}
+            {isCompressing ? copy.compressBusy : copy.compressCta}
           </button>
 
           <button
@@ -302,7 +341,7 @@ export function CompressImageTool() {
             disabled={items.filter((item) => item.compressedBlob).length === 0}
             className="mt-2 inline-flex w-full items-center justify-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Download compressed files
+            {copy.downloadCta}
           </button>
         </aside>
       </div>

@@ -70,6 +70,29 @@ npm run lint
 - `NEXT_PUBLIC_SITE_URL` (optional, canonical/sitemap base URL)
 - `NEXT_PUBLIC_GA_ID` (optional, enables GA tracking)
 
+## Deployment (Vercel)
+
+PDFNova is ready for Vercel deployment.
+
+### Deploy to Vercel
+
+1. Import this repository in Vercel.
+2. Set environment variables from `.env.example` as needed.
+3. Use the default build settings for Next.js.
+
+### Build commands
+
+```bash
+npm install
+npm run build
+```
+
+### Production run check (local)
+
+```bash
+npm run start
+```
+
 ## GitHub Push (manual)
 
 After creating a GitHub repository, run:

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CompressImageTool } from "@/components/tools/compress-image/compress-image-tool";
-import { PdfNovaToolsGrid } from "@/components/tools/shared/pdfnova-tools-grid";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
 const toolName = "Compress Image Online Free";
@@ -48,39 +48,48 @@ export const metadata: Metadata = buildToolMetadata({
 
 export default function CompressImagePage() {
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
       />
-
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Compress Image</h1>
-        <p className="mt-2 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Reduce image file size with browser-first compression and keep quality under control.
-        </p>
-      </header>
-
-      <PdfNovaToolsGrid currentToolHref="/tools/compress-image" />
-
-      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">How to compress images</h2>
-        <p className="mt-1 text-sm text-slate-600">Upload images, pick a compression level, then download optimized output.</p>
-      </section>
-
-      <CompressImageTool />
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <ActiveToolPageFrame
+        currentToolHref="/tools/compress-image"
+        title={{ en: "Compress Image", es: "Comprimir imagen" }}
+        subtitle={{
+          en: "Reduce image file size with browser-first compression and keep quality under control.",
+          es: "Reduce el tamano de imagenes en el navegador y controla la calidad final."
+        }}
+        howToTitle={{ en: "How to compress images", es: "Como comprimir imagenes" }}
+        howToText={{
+          en: "Upload images, pick a compression level, then download optimized output.",
+          es: "Sube imagenes, elige nivel de compresion y descarga resultados optimizados."
+        }}
+        faqItems={[
+          {
+            question: {
+              en: "Can I compress multiple images at once?",
+              es: "Puedo comprimir varias imagenes a la vez?"
+            },
+            answer: {
+              en: "Yes. Upload multiple images and compress them in a single batch.",
+              es: "Si. Sube varias imagenes y comprime todo en un solo lote."
+            }
+          },
+          {
+            question: {
+              en: "How can I download results?",
+              es: "Como puedo descargar resultados?"
+            },
+            answer: {
+              en: "Single image downloads directly. Multiple images are downloaded as a ZIP file.",
+              es: "Una sola imagen se descarga directa. Varias imagenes se descargan en ZIP."
+            }
+          }
+        ]}
+      >
+        <CompressImageTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }

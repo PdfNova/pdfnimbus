@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PdfToJpgTool } from "@/components/tools/pdf-to-jpg/pdf-to-jpg-tool";
-import { PdfNovaToolsGrid } from "@/components/tools/shared/pdfnova-tools-grid";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
 const toolName = "PDF to JPG Online Free";
@@ -49,39 +49,48 @@ export const metadata: Metadata = buildToolMetadata({
 
 export default function PdfToJpgPage() {
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
       />
-
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">PDF to JPG</h1>
-        <p className="mt-2 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Upload a PDF, convert each page to JPG in your browser, and download all images instantly.
-        </p>
-      </header>
-
-      <PdfNovaToolsGrid currentToolHref="/tools/pdf-to-jpg" />
-
-      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">How to convert PDF to JPG</h2>
-        <p className="mt-1 text-sm text-slate-600">Upload your PDF and export all pages as JPG files with one click.</p>
-      </section>
-
-      <PdfToJpgTool />
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <ActiveToolPageFrame
+        currentToolHref="/tools/pdf-to-jpg"
+        title={{ en: "PDF to JPG", es: "PDF a JPG" }}
+        subtitle={{
+          en: "Upload a PDF, convert each page to JPG in your browser, and download all images instantly.",
+          es: "Sube un PDF, convierte cada pagina a JPG en tu navegador y descarga todas las imagenes."
+        }}
+        howToTitle={{ en: "How to convert PDF to JPG", es: "Como convertir PDF a JPG" }}
+        howToText={{
+          en: "Upload your PDF and export all pages as JPG files with one click.",
+          es: "Sube tu PDF y exporta todas las paginas como archivos JPG con un clic."
+        }}
+        faqItems={[
+          {
+            question: {
+              en: "Can I convert every page of my PDF to JPG?",
+              es: "Puedo convertir cada pagina del PDF a JPG?"
+            },
+            answer: {
+              en: "Yes. Each PDF page is exported as its own JPG file.",
+              es: "Si. Cada pagina PDF se exporta como un archivo JPG separado."
+            }
+          },
+          {
+            question: {
+              en: "Are my files uploaded to a server?",
+              es: "Mis archivos se suben a un servidor?"
+            },
+            answer: {
+              en: "For typical use, processing happens in your browser and files are not stored on our servers.",
+              es: "Para uso normal, el procesamiento ocurre en tu navegador y no guardamos tus archivos."
+            }
+          }
+        ]}
+      >
+        <PdfToJpgTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CompressPdfTool } from "@/components/tools/compress-pdf/compress-pdf-tool";
-import { PdfNovaToolsGrid } from "@/components/tools/shared/pdfnova-tools-grid";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
 const toolName = "Compress PDF Files Online Free";
@@ -55,39 +55,58 @@ export const metadata: Metadata = buildToolMetadata({
 
 export default function CompressPdfPage() {
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
       />
-
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Compress PDF</h1>
-        <p className="mt-2 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Reduce PDF file size quickly and download an optimized version instantly.
-        </p>
-      </header>
-
-      <PdfNovaToolsGrid currentToolHref="/tools/compress-pdf" />
-
-      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">How to compress PDFs</h2>
-        <p className="mt-1 text-sm text-slate-600">Upload one PDF, choose a compression level, then download the optimized file.</p>
-      </section>
-
-      <CompressPdfTool />
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <ActiveToolPageFrame
+        currentToolHref="/tools/compress-pdf"
+        title={{ en: "Compress PDF", es: "Comprimir PDF" }}
+        subtitle={{
+          en: "Reduce PDF file size fast and download an optimized version instantly.",
+          es: "Reduce el tamano de tu PDF rapido y descarga una version optimizada al instante."
+        }}
+        howToTitle={{ en: "How to compress PDFs", es: "Como comprimir PDFs" }}
+        howToText={{
+          en: "Upload one PDF, pick a compression level, then download the optimized output.",
+          es: "Sube un PDF, elige un nivel de compresion y descarga el resultado optimizado."
+        }}
+        faqItems={[
+          {
+            question: {
+              en: "Is this Compress PDF tool free to use?",
+              es: "Esta herramienta de comprimir PDF es gratis?"
+            },
+            answer: {
+              en: "Yes. You can compress PDF files directly in your browser without an account.",
+              es: "Si. Puedes comprimir PDFs en tu navegador sin cuenta."
+            }
+          },
+          {
+            question: {
+              en: "Are my PDF files uploaded to a server?",
+              es: "Mis PDFs se suben a un servidor?"
+            },
+            answer: {
+              en: "For typical use, processing stays in your browser and files are not stored on our servers.",
+              es: "Para uso normal, el procesamiento queda en tu navegador y no guardamos tus archivos."
+            }
+          },
+          {
+            question: {
+              en: "Will file quality change after compression?",
+              es: "La calidad cambia despues de comprimir?"
+            },
+            answer: {
+              en: "It depends on the selected level. Recommended mode balances quality and size reduction.",
+              es: "Depende del nivel elegido. El modo recomendado equilibra calidad y reduccion."
+            }
+          }
+        ]}
+      >
+        <CompressPdfTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }

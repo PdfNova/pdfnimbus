@@ -1,4 +1,4 @@
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { PDFDocument } from "pdf-lib";
 
 GlobalWorkerOptions.workerSrc =
@@ -65,3 +65,4 @@ export async function compressPdfFile(
 
   return new Blob([Uint8Array.from(outputBytes)], { type: "application/pdf" });
 }
+

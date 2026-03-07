@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MergePdfTool } from "@/components/tools/merge-pdf/merge-pdf-tool";
-import { PdfNovaToolsGrid } from "@/components/tools/shared/pdfnova-tools-grid";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
 const toolName = "Merge PDF Files Online Free";
@@ -54,39 +54,58 @@ export const metadata: Metadata = buildToolMetadata({
 
 export default function MergePdfPage() {
   return (
-    <main className="mx-auto w-full max-w-[1300px] px-4 py-6 sm:px-6 sm:py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
       />
-
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Merge PDF</h1>
-        <p className="mt-2 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Upload PDFs, reorder files visually, and merge everything into one clean document in seconds.
-        </p>
-      </header>
-
-      <PdfNovaToolsGrid currentToolHref="/tools/merge-pdf" />
-
-      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">How to merge PDFs</h2>
-        <p className="mt-1 text-sm text-slate-600">Upload files, drag cards to set order, then merge and download the final PDF.</p>
-      </section>
-
-      <MergePdfTool />
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <ActiveToolPageFrame
+        currentToolHref="/tools/merge-pdf"
+        title={{ en: "Merge PDF", es: "Unir PDF" }}
+        subtitle={{
+          en: "Upload PDFs, set order visually, and merge everything into one clean document in seconds.",
+          es: "Sube PDFs, ajusta el orden visualmente y une todo en un documento limpio en segundos."
+        }}
+        howToTitle={{ en: "How to merge PDFs", es: "Como unir PDFs" }}
+        howToText={{
+          en: "Upload files, drag cards to set order, then merge and download the final PDF.",
+          es: "Sube archivos, arrastra tarjetas para definir orden y descarga el PDF final."
+        }}
+        faqItems={[
+          {
+            question: {
+              en: "Is this Merge PDF tool free to use?",
+              es: "Esta herramienta de unir PDF es gratis?"
+            },
+            answer: {
+              en: "Yes. You can merge PDF files in your browser without creating an account.",
+              es: "Si. Puedes unir PDFs en tu navegador sin crear cuenta."
+            }
+          },
+          {
+            question: {
+              en: "Are my files uploaded to a server?",
+              es: "Mis archivos se suben a un servidor?"
+            },
+            answer: {
+              en: "For typical use, all processing happens directly in your browser and files are not stored on our servers.",
+              es: "Para uso normal, todo se procesa en tu navegador y los archivos no se guardan en nuestros servidores."
+            }
+          },
+          {
+            question: {
+              en: "Can I choose the order before merging?",
+              es: "Puedo elegir el orden antes de unir?"
+            },
+            answer: {
+              en: "Yes. Drag each PDF card into the desired order before running merge.",
+              es: "Si. Arrastra cada tarjeta PDF al orden deseado antes de unir."
+            }
+          }
+        ]}
+      >
+        <MergePdfTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }

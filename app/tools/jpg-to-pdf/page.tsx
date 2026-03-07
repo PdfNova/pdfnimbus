@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JpgToPdfTool } from "@/components/tools/jpg-to-pdf/jpg-to-pdf-tool";
-import { PdfNovaToolsGrid } from "@/components/tools/shared/pdfnova-tools-grid";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
 const toolName = "JPG to PDF Online Free";
@@ -49,39 +49,48 @@ export const metadata: Metadata = buildToolMetadata({
 
 export default function JpgToPdfPage() {
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
       />
-
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">JPG to PDF</h1>
-        <p className="mt-2 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Upload JPG or PNG images, set the order, and generate one clean PDF in seconds.
-        </p>
-      </header>
-
-      <PdfNovaToolsGrid currentToolHref="/tools/jpg-to-pdf" />
-
-      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">How to convert JPG to PDF</h2>
-        <p className="mt-1 text-sm text-slate-600">Upload images, set order, and convert them into one PDF file.</p>
-      </section>
-
-      <JpgToPdfTool />
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <ActiveToolPageFrame
+        currentToolHref="/tools/jpg-to-pdf"
+        title={{ en: "JPG to PDF", es: "JPG a PDF" }}
+        subtitle={{
+          en: "Upload JPG or PNG images, set order, and generate one clean PDF in seconds.",
+          es: "Sube imagenes JPG o PNG, define el orden y genera un PDF limpio en segundos."
+        }}
+        howToTitle={{ en: "How to convert JPG to PDF", es: "Como convertir JPG a PDF" }}
+        howToText={{
+          en: "Upload images, set order, and convert them into one PDF file.",
+          es: "Sube imagenes, ajusta el orden y conviertelas en un solo PDF."
+        }}
+        faqItems={[
+          {
+            question: {
+              en: "Can I combine multiple images into one PDF?",
+              es: "Puedo combinar varias imagenes en un PDF?"
+            },
+            answer: {
+              en: "Yes. Upload multiple JPG or PNG images and convert them into one PDF.",
+              es: "Si. Sube varias imagenes JPG o PNG y conviertelas en un PDF."
+            }
+          },
+          {
+            question: {
+              en: "Are my files uploaded to a server?",
+              es: "Mis archivos se suben a un servidor?"
+            },
+            answer: {
+              en: "For typical use, processing happens in your browser and files are not stored on our servers.",
+              es: "Para uso normal, el procesamiento ocurre en tu navegador y no guardamos archivos en servidores."
+            }
+          }
+        ]}
+      >
+        <JpgToPdfTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }
