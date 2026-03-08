@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GuidePageTemplate } from "@/app/guides/_components/guide-page-template";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -16,6 +16,18 @@ const articleJsonLd = {
     name: "PDFNimbus"
   }
 };
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: title,
+  description,
+  step: [
+    { "@type": "HowToStep", text: "Open the matching PDFNimbus tool for this task." },
+    { "@type": "HowToStep", text: "Upload your file(s) and review the preview/options." },
+    { "@type": "HowToStep", text: "Run the action and verify output before download." },
+    { "@type": "HowToStep", text: "Download the final file(s)." }
+  ]
+};
 
 export const metadata: Metadata = buildToolMetadata({
   title,
@@ -26,8 +38,10 @@ export const metadata: Metadata = buildToolMetadata({
 export default function RotatePdfPagesGuidePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleJsonLd, howToJsonLd]) }} />
       <GuidePageTemplate
+        currentGuideHref="/guides/rotate-pdf-pages"
+        
         title={title}
         intro={[
           "If PDF pages appear sideways or upside down, rotation is the quickest fix before sharing or printing. This is common with scans from mobile cameras, mixed-source reports, and exported documents with inconsistent page orientation.",
@@ -66,3 +80,6 @@ export default function RotatePdfPagesGuidePage() {
     </>
   );
 }
+
+
+

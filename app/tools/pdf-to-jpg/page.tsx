@@ -3,9 +3,9 @@ import { PdfToJpgTool } from "@/components/tools/pdf-to-jpg/pdf-to-jpg-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
-const toolName = "PDF to JPG Online Free";
+const toolName = "PDF to JPG Online Free — PDFNimbus";
 const toolDescription =
-  "Convert PDF pages to JPG images instantly. Browser-first conversion with no uploads required for typical use.";
+  "Convert PDF pages to high-quality JPG images in seconds. Free browser-based converter with local processing for typical use.";
 
 const faqItems = [
   {
@@ -38,6 +38,7 @@ const softwareJsonLd = {
   name: "PDFNimbus PDF to JPG",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/pdf-to-jpg",
   operatingSystem: "Web"
 };
 
@@ -88,6 +89,10 @@ export default function PdfToJpgPage() {
           { href: "/tools/jpg-to-pdf", label: { en: "JPG to PDF", es: "JPG a PDF" } },
           { href: "/tools/compress-image", label: { en: "Compress Image", es: "Comprimir imagen" } },
           { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/pdf-pages-to-jpg", label: { en: "How to Convert PDF Pages to JPG Images", es: "Como convertir paginas PDF a JPG" } }
         ]}
         faqItems={[
           {

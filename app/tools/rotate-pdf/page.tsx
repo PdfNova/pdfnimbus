@@ -3,9 +3,9 @@ import { RotatePdfTool } from "@/components/tools/rotate-pdf/rotate-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
-const toolName = "Rotate PDF Online Free";
+const toolName = "Rotate PDF Online Free — PDFNimbus";
 const toolDescription =
-  "Rotate PDF pages online with live preview and download the updated file instantly.";
+  "Rotate PDF pages with live visual preview and download instantly. Free browser-based rotation with local processing for typical use.";
 
 const faqItems = [
   {
@@ -38,6 +38,7 @@ const softwareJsonLd = {
   name: "PDFNimbus Rotate PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/rotate-pdf",
   operatingSystem: "Web"
 };
 
@@ -88,6 +89,10 @@ export default function RotatePdfPage() {
           { href: "/tools/split-pdf", label: { en: "Split PDF", es: "Dividir PDF" } },
           { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
           { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/rotate-pdf-pages", label: { en: "How to Rotate PDF Pages Online", es: "Como rotar paginas PDF online" } }
         ]}
         faqItems={[
           {

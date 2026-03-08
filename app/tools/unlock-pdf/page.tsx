@@ -1,58 +1,111 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { UnlockPdfTool } from "@/components/tools/unlock-pdf/unlock-pdf-tool";
+import { buildToolMetadata } from "@/lib/seo";
+
+const toolName = "Unlock PDF Online Free — PDFNimbus";
+const toolDescription =
+  "Unlock PDF files by removing password restrictions when permitted. Free browser-first unlock workflow for typical use.";
 
 const faqItems = [
   {
-    question: "Is this Unlock PDF tool free to use?",
-    answer: "Yes. This tool follows the same browser-first architecture as the other PDF tools."
+    question: "Is this Unlock PDF tool free?",
+    answer: "Yes. You can use this browser-based unlock workflow for free."
   },
   {
-    question: "Are my files uploaded to a server?",
-    answer: "For typical usage, files are handled in your browser for privacy."
+    question: "Are files uploaded to a server?",
+    answer: "For typical use, processing is browser-first and files are not stored on our servers."
+  },
+  {
+    question: "Can this tool crack unknown passwords?",
+    answer: "No. This tool does not crack unknown passwords. It only removes known passwords entered by the user or owner restrictions when permitted."
+  },
+  {
+    question: "Any legal limitations before unlocking?",
+    answer: "Only use this tool on PDFs you own or have explicit permission to unlock."
   }
 ];
 
-export const metadata: Metadata = {
-  title: "Unlock PDF Online",
-  description: "Remove PDF password restrictions when permitted."
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer
+    }
+  }))
 };
 
-export default function Page() {
+const softwareJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "PDFNimbus Unlock PDF",
+  description: toolDescription,
+  applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/unlock-pdf",
+  operatingSystem: "Web"
+};
+
+export const metadata: Metadata = buildToolMetadata({
+  title: toolName,
+  description: toolDescription,
+  canonicalPath: "/tools/unlock-pdf"
+});
+
+export default function UnlockPdfPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Unlock PDF Online</h1>
-        <p className="mt-3 max-w-3xl text-base text-slate-600 sm:text-lg">
-          Remove PDF password restrictions when permitted.
-        </p>
-      </header>
-
-      <UnlockPdfTool />
-
-      <section className="mt-12 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-        <div className="mt-5 space-y-5">
-          {faqItems.map((item) => (
-            <article key={item.question}>
-              <h3 className="text-base font-semibold text-slate-900">{item.question}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-        <h2 className="text-xl font-semibold text-slate-900">Related tools</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Link href="/tools/merge-pdf" className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">Merge PDF</Link>
-          <Link href="/tools/compress-pdf" className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">Compress PDF</Link>
-          <Link href="/tools/split-pdf" className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">Split PDF</Link>
-          <Link href="/tools/pdf-to-jpg" className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">PDF to JPG</Link>
-        </div>
-      </section>
-    </main>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareJsonLd, faqJsonLd]) }}
+      />
+      <ActiveToolPageFrame
+        currentToolHref="/tools/unlock-pdf"
+        title={{ en: "Unlock PDF", es: "Desbloquear PDF" }}
+        subtitle={{
+          en: "Use this free browser-based tool to remove PDF password restrictions when you have permission.",
+          es: "Usa esta herramienta browser-first gratuita para quitar restricciones de contrasena en PDF cuando tienes permiso."
+        }}
+        howToTitle={{ en: "How to unlock a PDF", es: "Como desbloquear un PDF" }}
+        howToText={{
+          en: "Upload your PDF, provide required credentials, and export an unlocked version.",
+          es: "Sube tu PDF, aporta credenciales necesarias y exporta una version desbloqueada."
+        }}
+        introParagraphs={[
+          {
+            en: "This page provides an indexable unlock workflow surface, internal-link integration, and schema support while feature UI is finalized.",
+            es: "Esta pagina aporta una superficie indexable de desbloqueo, interlinking y esquema mientras se finaliza la UI funcional."
+          }
+        ]}
+        relatedToolsTitle={{ en: "Related PDF tools", es: "Herramientas PDF relacionadas" }}
+        relatedTools={[
+          { href: "/tools/protect-pdf", label: { en: "Protect PDF", es: "Proteger PDF" } },
+          { href: "/tools/remove-pdf-pages", label: { en: "Remove PDF Pages", es: "Eliminar paginas PDF" } },
+          { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
+          { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/unlock-pdf", label: { en: "How to Unlock PDF", es: "Como desbloquear PDF" } },
+          {
+            href: "/guides/remove-password-from-pdf",
+            label: { en: "How to Remove Password from PDF", es: "Como quitar contrasena de PDF" }
+          },
+          {
+            href: "/guides/unlock-pdf-for-printing",
+            label: { en: "How to Unlock PDF for Printing", es: "Como desbloquear PDF para imprimir" }
+          }
+        ]}
+        faqItems={faqItems.map((item) => ({
+          question: { en: item.question, es: item.question },
+          answer: { en: item.answer, es: item.answer }
+        }))}
+      >
+        <UnlockPdfTool />
+      </ActiveToolPageFrame>
+    </>
   );
 }
-
-

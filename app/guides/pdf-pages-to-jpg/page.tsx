@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GuidePageTemplate } from "@/app/guides/_components/guide-page-template";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -16,6 +16,18 @@ const articleJsonLd = {
     name: "PDFNimbus"
   }
 };
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: title,
+  description,
+  step: [
+    { "@type": "HowToStep", text: "Open the matching PDFNimbus tool for this task." },
+    { "@type": "HowToStep", text: "Upload your file(s) and review the preview/options." },
+    { "@type": "HowToStep", text: "Run the action and verify output before download." },
+    { "@type": "HowToStep", text: "Download the final file(s)." }
+  ]
+};
 
 export const metadata: Metadata = buildToolMetadata({
   title,
@@ -26,8 +38,10 @@ export const metadata: Metadata = buildToolMetadata({
 export default function PdfPagesToJpgGuidePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleJsonLd, howToJsonLd]) }} />
       <GuidePageTemplate
+        currentGuideHref="/guides/pdf-pages-to-jpg"
+        
         title={title}
         intro={[
           "Converting PDF pages to JPG is useful when you need image-based assets for design, social sharing, presentations, or quick previews. Instead of sharing an entire document, you can export only the visual pages you need.",
@@ -66,3 +80,6 @@ export default function PdfPagesToJpgGuidePage() {
     </>
   );
 }
+
+
+

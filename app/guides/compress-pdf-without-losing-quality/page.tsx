@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GuidePageTemplate } from "@/app/guides/_components/guide-page-template";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -16,6 +16,18 @@ const articleJsonLd = {
     name: "PDFNimbus"
   }
 };
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: title,
+  description,
+  step: [
+    { "@type": "HowToStep", text: "Open the matching PDFNimbus tool for this task." },
+    { "@type": "HowToStep", text: "Upload your file(s) and review the preview/options." },
+    { "@type": "HowToStep", text: "Run the action and verify output before download." },
+    { "@type": "HowToStep", text: "Download the final file(s)." }
+  ]
+};
 
 export const metadata: Metadata = buildToolMetadata({
   title,
@@ -26,8 +38,10 @@ export const metadata: Metadata = buildToolMetadata({
 export default function CompressPdfWithoutLosingQualityGuidePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleJsonLd, howToJsonLd]) }} />
       <GuidePageTemplate
+        currentGuideHref="/guides/compress-pdf-without-losing-quality"
+        
         title={title}
         intro={[
           "When a PDF is too heavy for email, portals, or messaging apps, compression is the fastest fix. The challenge is reducing size while keeping text and visuals clear enough for real use.",
@@ -62,7 +76,19 @@ export default function CompressPdfWithoutLosingQualityGuidePage() {
           { href: "/tools/split-pdf", label: "Split PDF" },
           { href: "/tools/pdf-to-jpg", label: "PDF to JPG" }
         ]}
+        relatedGuides={[
+          { href: "/guides/compress-pdf-for-email", label: "How to Compress PDF for Email" },
+          { href: "/guides/merge-pdf-files", label: "How to Merge PDF Files Online" }
+        ]}
+        faqItems={[
+          { question: "Will compression reduce quality?", answer: "Quality impact depends on selected level; recommended mode is usually the best balance." },
+          { question: "Is this good for attachment limits?", answer: "Yes, use it to reduce PDF size for email and upload constraints." },
+          { question: "Can I re-run with different settings?", answer: "Yes, you can compress again with another level and compare results." }
+        ]}
       />
     </>
   );
 }
+
+
+

@@ -3,9 +3,9 @@ import { CompressPdfTool } from "@/components/tools/compress-pdf/compress-pdf-to
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
-const toolName = "Compress PDF Files Online Free";
+const toolName = "Compress PDF Online Free — PDFNimbus";
 const toolDescription =
-  "Reduce PDF file size instantly. Browser-first compression with no uploads required for typical use.";
+  "Compress PDF files fast while keeping readable quality. Free browser-based compressor with local processing for typical use.";
 
 const faqItems = [
   {
@@ -44,6 +44,7 @@ const softwareJsonLd = {
   name: "PDFNimbus Compress PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/compress-pdf",
   operatingSystem: "Web"
 };
 
@@ -94,6 +95,10 @@ export default function CompressPdfPage() {
           { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
           { href: "/tools/split-pdf", label: { en: "Split PDF", es: "Dividir PDF" } },
           { href: "/tools/pdf-to-jpg", label: { en: "PDF to JPG", es: "PDF a JPG" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/compress-pdf-without-losing-quality", label: { en: "How to Compress PDF Without Losing Quality", es: "Como comprimir PDF sin perder calidad" } }
         ]}
         faqItems={[
           {

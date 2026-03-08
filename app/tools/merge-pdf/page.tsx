@@ -3,9 +3,9 @@ import { MergePdfTool } from "@/components/tools/merge-pdf/merge-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
-const toolName = "Merge PDF Files Online Free";
+const toolName = "Merge PDF Online Free — PDFNimbus";
 const toolDescription =
-  "Combine multiple PDF files into one document instantly. Browser-first PDF merging with no uploads required.";
+  "Merge multiple PDF files into one document instantly. Free browser-based PDF merger with local processing for typical use.";
 
 const faqItems = [
   {
@@ -43,6 +43,7 @@ const softwareJsonLd = {
   name: "PDFNimbus Merge PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/merge-pdf",
   operatingSystem: "Web"
 };
 
@@ -93,6 +94,11 @@ export default function MergePdfPage() {
           { href: "/tools/split-pdf", label: { en: "Split PDF", es: "Dividir PDF" } },
           { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } },
           { href: "/tools/rotate-pdf", label: { en: "Rotate PDF", es: "Rotar PDF" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/merge-pdf-files", label: { en: "How to Merge PDF Files Online", es: "Como unir archivos PDF online" } },
+          { href: "/guides/combine-pdf-pages", label: { en: "How to Combine PDF Pages", es: "Como combinar paginas PDF" } }
         ]}
         faqItems={[
           {

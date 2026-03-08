@@ -10,6 +10,16 @@ type RelatedTool = {
   label: string;
 };
 
+type RelatedGuide = {
+  href: string;
+  label: string;
+};
+
+type FaqItem = {
+  question: string;
+  answer: string;
+};
+
 type GuidePageTemplateProps = {
   title: string;
   intro: string[];
@@ -18,6 +28,9 @@ type GuidePageTemplateProps = {
   ctaLabel: string;
   benefits: string[];
   relatedTools: RelatedTool[];
+  relatedGuides?: RelatedGuide[];
+  currentGuideHref?: string;
+  faqItems?: FaqItem[];
   sections?: GuideSection[];
 };
 
@@ -29,8 +42,23 @@ export function GuidePageTemplate({
   ctaLabel,
   benefits,
   relatedTools,
+  relatedGuides,
+  currentGuideHref,
+  faqItems,
   sections
 }: GuidePageTemplateProps) {
+  const fallbackGuides: RelatedGuide[] = [
+    { href: "/guides/merge-pdf-files", label: "How to Merge PDF Files Online" },
+    { href: "/guides/compress-pdf-without-losing-quality", label: "How to Compress PDF Without Losing Quality" },
+    { href: "/guides/split-pdf-by-range", label: "How to Split PDF by Page Range" },
+    { href: "/guides/pdf-pages-to-jpg", label: "How to Convert PDF Pages to JPG Images" }
+  ];
+
+  const guidesToShow =
+    relatedGuides && relatedGuides.length >= 2
+      ? relatedGuides
+      : fallbackGuides.filter((guide) => guide.href !== currentGuideHref).slice(0, 2);
+
   return (
     <main className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 sm:py-7">
       <article className="space-y-4">
@@ -94,6 +122,50 @@ export function GuidePageTemplate({
               </Link>
             ))}
           </div>
+        </section>
+
+        {guidesToShow && guidesToShow.length > 0 ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-900">Related guides</h2>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {guidesToShow.map((guide) => (
+                <Link
+                  key={guide.href}
+                  href={guide.href}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:bg-white hover:text-brand-700"
+                >
+                  {guide.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {faqItems && faqItems.length > 0 ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-900">FAQ</h2>
+            <div className="mt-3 space-y-3">
+              {faqItems.map((item, index) => (
+                <article key={`faq-${index}`}>
+                  <h3 className="text-sm font-semibold text-slate-900">{item.question}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">{item.answer}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section className="rounded-2xl border border-brand-200 bg-brand-50 p-5 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-900">Use this tool</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            Ready to complete this task? Open the tool and run it directly in your browser.
+          </p>
+          <Link
+            href={ctaHref}
+            className="mt-3 inline-flex rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+          >
+            {ctaLabel}
+          </Link>
         </section>
       </article>
     </main>

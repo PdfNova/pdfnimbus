@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GuidePageTemplate } from "@/app/guides/_components/guide-page-template";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -17,6 +17,19 @@ const articleJsonLd = {
   }
 };
 
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "How to merge PDF files online",
+  description,
+  step: [
+    { "@type": "HowToStep", text: "Upload all PDF files you want to combine." },
+    { "@type": "HowToStep", text: "Reorder file cards to match the final document order." },
+    { "@type": "HowToStep", text: "Choose output page sizing and run merge." },
+    { "@type": "HowToStep", text: "Download the merged PDF file." }
+  ]
+};
+
 export const metadata: Metadata = buildToolMetadata({
   title,
   description,
@@ -26,8 +39,13 @@ export const metadata: Metadata = buildToolMetadata({
 export default function MergePdfFilesGuidePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([articleJsonLd, howToJsonLd]) }}
+      />
       <GuidePageTemplate
+        currentGuideHref="/guides/merge-pdf-files"
+        
         title={title}
         intro={[
           "If you need to combine invoices, signed pages, project exports, or form packets, merging PDFs is usually the fastest way to produce one shareable file. A clean merged document also makes uploads easier when a portal accepts only a single PDF.",
@@ -66,3 +84,4 @@ export default function MergePdfFilesGuidePage() {
     </>
   );
 }
+

@@ -3,9 +3,9 @@ import { SplitPdfTool } from "@/components/tools/split-pdf/split-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
-const toolName = "Split PDF Pages Online Free";
+const toolName = "Split PDF Online Free — PDFNimbus";
 const toolDescription =
-  "Split a PDF by pages, ranges, or groups and download exactly what you need in seconds.";
+  "Split PDF pages by selection, range, or group in seconds. Free browser-based splitter with local processing for typical use.";
 
 const faqItems = [
   {
@@ -38,6 +38,7 @@ const softwareJsonLd = {
   name: "PDFNimbus Split PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
+  url: "https://pdfnimbus.vercel.app/tools/split-pdf",
   operatingSystem: "Web"
 };
 
@@ -88,6 +89,10 @@ export default function SplitPdfPage() {
           { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
           { href: "/tools/rotate-pdf", label: { en: "Rotate PDF", es: "Rotar PDF" } },
           { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } }
+        ]}
+        relatedGuidesTitle={{ en: "Learn how to use this tool", es: "Aprende a usar esta herramienta" }}
+        relatedGuides={[
+          { href: "/guides/split-pdf-by-range", label: { en: "How to Split PDF by Page Range", es: "Como dividir PDF por rango" } }
         ]}
         faqItems={[
           {

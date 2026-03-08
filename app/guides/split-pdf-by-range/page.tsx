@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GuidePageTemplate } from "@/app/guides/_components/guide-page-template";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -16,6 +16,18 @@ const articleJsonLd = {
     name: "PDFNimbus"
   }
 };
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: title,
+  description,
+  step: [
+    { "@type": "HowToStep", text: "Open the matching PDFNimbus tool for this task." },
+    { "@type": "HowToStep", text: "Upload your file(s) and review the preview/options." },
+    { "@type": "HowToStep", text: "Run the action and verify output before download." },
+    { "@type": "HowToStep", text: "Download the final file(s)." }
+  ]
+};
 
 export const metadata: Metadata = buildToolMetadata({
   title,
@@ -26,8 +38,10 @@ export const metadata: Metadata = buildToolMetadata({
 export default function SplitPdfByRangeGuidePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleJsonLd, howToJsonLd]) }} />
       <GuidePageTemplate
+        currentGuideHref="/guides/split-pdf-by-range"
+        
         title={title}
         intro={[
           "Splitting a PDF by range is useful when only part of a document is needed, such as extracting specific chapters, invoice batches, or legal sections. It helps reduce file size and keeps recipients focused on the relevant pages.",
@@ -66,3 +80,6 @@ export default function SplitPdfByRangeGuidePage() {
     </>
   );
 }
+
+
+

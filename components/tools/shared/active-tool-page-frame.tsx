@@ -16,6 +16,11 @@ type RelatedToolLink = {
   label: LocalizedText;
 };
 
+type RelatedGuideLink = {
+  href: string;
+  label: LocalizedText;
+};
+
 type ActiveToolPageFrameProps = {
   currentToolHref: string;
   title: LocalizedText;
@@ -27,6 +32,8 @@ type ActiveToolPageFrameProps = {
   benefitsItems?: LocalizedText[];
   relatedToolsTitle?: LocalizedText;
   relatedTools?: RelatedToolLink[];
+  relatedGuidesTitle?: LocalizedText;
+  relatedGuides?: RelatedGuideLink[];
   faqItems: FaqItem[];
   children: React.ReactNode;
 };
@@ -46,6 +53,8 @@ export function ActiveToolPageFrame({
   benefitsItems,
   relatedToolsTitle,
   relatedTools,
+  relatedGuidesTitle,
+  relatedGuides,
   faqItems,
   children
 }: ActiveToolPageFrameProps) {
@@ -118,6 +127,25 @@ export function ActiveToolPageFrame({
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:bg-white hover:text-brand-700"
               >
                 {pick(language, tool.label)}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {relatedGuides && relatedGuides.length > 0 ? (
+        <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="text-lg font-semibold text-slate-900">
+            {relatedGuidesTitle ? pick(language, relatedGuidesTitle) : "Learn how to use this tool"}
+          </h2>
+          <div className="mt-2.5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedGuides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:bg-white hover:text-brand-700"
+              >
+                {pick(language, guide.label)}
               </Link>
             ))}
           </div>

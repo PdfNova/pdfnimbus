@@ -92,7 +92,17 @@ export const toolRegistry: ToolRegistryItem[] = [
     description: "Convert PDF documents into editable Word files.",
     icon: "PDF->DOC",
     category: "document",
-    active: false
+    active: true
+  },
+  {
+    href: "/tools/pdf-to-excel",
+    labelKey: "toolPdfToExcelLabel",
+    descriptionKey: "toolPdfToExcelDescription",
+    label: "PDF to Excel",
+    description: "Extract PDF table-like text as CSV for Excel.",
+    icon: "PDF->XLS",
+    category: "document",
+    active: true
   },
   {
     href: "/tools/word-to-pdf",
@@ -102,7 +112,57 @@ export const toolRegistry: ToolRegistryItem[] = [
     description: "Convert Word files into PDF format.",
     icon: "DOC->PDF",
     category: "document",
-    active: false
+    active: true
+  },
+  {
+    href: "/tools/excel-to-pdf",
+    labelKey: "toolExcelToPdfLabel",
+    descriptionKey: "toolExcelToPdfDescription",
+    label: "Excel to PDF",
+    description: "Convert simple spreadsheets and CSV data into PDF.",
+    icon: "XLS->PDF",
+    category: "document",
+    active: true
+  },
+  {
+    href: "/tools/pdf-to-powerpoint",
+    labelKey: "toolPdfToPowerPointLabel",
+    descriptionKey: "toolPdfToPowerPointDescription",
+    label: "PDF to PowerPoint",
+    description: "Turn PDF pages into image-based PowerPoint slides.",
+    icon: "PDF->PPT",
+    category: "document",
+    active: true
+  },
+  {
+    href: "/tools/powerpoint-to-pdf",
+    labelKey: "toolPowerPointToPdfLabel",
+    descriptionKey: "toolPowerPointToPdfDescription",
+    label: "PowerPoint to PDF",
+    description: "Convert extractable slide images into PDF pages.",
+    icon: "PPT->PDF",
+    category: "document",
+    active: true
+  },
+  {
+    href: "/tools/protect-pdf",
+    labelKey: "toolProtectPdfLabel",
+    descriptionKey: "toolProtectPdfDescription",
+    label: "Protect PDF",
+    description: "Add password protection to PDF files.",
+    icon: "LOCK",
+    category: "pdf",
+    active: true
+  },
+  {
+    href: "/tools/unlock-pdf",
+    labelKey: "toolUnlockPdfLabel",
+    descriptionKey: "toolUnlockPdfDescription",
+    label: "Unlock PDF",
+    description: "Remove password restrictions from PDFs when permitted.",
+    icon: "UNLOCK",
+    category: "pdf",
+    active: true
   },
   {
     href: "/tools/qr-generator",
