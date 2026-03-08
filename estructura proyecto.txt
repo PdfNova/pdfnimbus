@@ -1,0 +1,586 @@
+Aquí tienes el roadmap mejorado con más precisión técnica, orden de prioridades más realista, y gaps que el original no cubría:
+
+---
+
+# ROADMAP PROFESIONAL — PDFNimbus
+
+## Principios antes de empezar
+
+Antes de ejecutar cualquier fase, interioriza esto:
+
+SEO sin producto sólido es dinero y tiempo tirado. Google mide engagement, tiempo en página, y tasa de rebote. Si las herramientas fallan o son lentas, ningún backlink te va a salvar. El orden importa: producto primero, SEO encima.
+
+---
+
+## Fase 0 — Estabilidad técnica
+
+**Estado actual:** ~90% completado
+**Bloquea todo lo demás hasta estar al 100%**
+
+### 0.1 Rebranding
+
+Busca y elimina cualquier rastro de PDFNova en:
+
+```
+lib/brand.ts
+lib/seo.ts
+README.md
+public/og-image.svg
+app/layout.tsx
+todos los archivos de metadata
+nombres de descarga (deben ser pdfnimbus-*)
+package.json (name field)
+```
+
+Ejecuta esto para verificar que no queda nada:
+
+```bash
+grep -r "pdfnova\|PDFNova\|pdf-nova" . --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" -i
+```
+
+### 0.2 Build limpio y obligatorio
+
+Estas dos deben pasar siempre antes de hacer cualquier deploy:
+
+```bash
+npm run lint
+npm run build
+```
+
+Si el build falla por cualquier razón, se para todo. No hay SEO, no hay deploy, no hay nada hasta que el build sea verde. Esto no es negociable.
+
+### 0.3 .gitignore
+
+```
+node_modules/
+.next/
+.env
+.env.local
+*.tmp
+tmp/
+coverage/
+out/
+```
+
+Añade `.env` y `.env.local` explícitamente. El original los olvidaba y es un riesgo de seguridad real.
+
+### 0.4 Deploy en Vercel
+
+Orden de operaciones correcto:
+
+1. Renombrar proyecto en Vercel dashboard a `pdfnimbus`
+2. El subdominio resultante será `pdfnimbus.vercel.app`
+3. Configurar deploy automático desde rama `main`
+4. Añadir environment variables si las hay
+5. Verificar que el dominio final responde con HTTPS
+
+**Nota crítica:** Si ya tienes usuarios o cualquier link externo apuntando a `pdfnova-three.vercel.app`, configura un redirect 301 desde el dominio antiguo al nuevo. Un redirect mal hecho destruye el link equity que hayas acumulado.
+
+---
+
+## Fase 1 — Producto: las herramientas
+
+**Estado actual:** ~70-80%
+**Prioridad máxima. Sin esto, nada más funciona.**
+
+### Estándar UX que debe cumplir cada tool
+
+Toda herramienta debe tener estos seis estados visibles:
+
+| Estado | Descripción |
+|---|---|
+| Empty | Drag & drop visual, instrucciones claras |
+| Uploading | Progress visible |
+| Processing | Loading con mensaje específico ("Merging…", "Compressing…") |
+| Error | Mensaje específico, no genérico. "File too large" no "Something went wrong" |
+| Success | Resultado visible, métricas claras, CTA de descarga prominente |
+| Trust | "Processed locally in your browser. No files leave your device." |
+
+El trust message no es opcional. Es lo que convierte visitantes indecisos. Ponlo visible en todas las tools, no escondido en un footer.
+
+---
+
+### Merge PDF
+
+Requisitos funcionales:
+
+- Subir múltiples PDFs (drag & drop + click)
+- Thumbnail real de primera página por archivo
+- Nombre, tamaño, número de páginas visible en cada card
+- Reordenar por drag & drop
+- Eliminar archivo individual
+- Clear all
+- Selector de tamaño de página con estas opciones exactas y este default:
+
+```
+○ Keep original page sizes
+● Normalize to A4       ← DEFAULT
+○ Normalize to Letter
+```
+
+Layout: dos columnas. Izquierda = cards con previews y reorder. Derecha = configuración + CTA merge.
+
+**Detalle importante que el roadmap original no mencionaba:** el botón de merge debe estar deshabilitado y con tooltip explicativo si hay menos de 2 archivos subidos. Si está habilitado con un solo archivo, la UX es confusa.
+
+---
+
+### Compress PDF
+
+Requisitos funcionales:
+
+- Preview real del PDF subido
+- Nombre, páginas y tamaño original visibles antes de comprimir
+- Selector de nivel de compresión:
+
+```
+○ Low compression (better quality)
+● Balanced               ← DEFAULT
+○ High compression (smaller file)
+```
+
+- Estado de resultado debe mostrar:
+
+```
+Original:    2.4 MB
+Compressed:  890 KB
+Saved:       63%  ✓
+```
+
+- Bloque de herramientas relacionadas post-descarga
+- Mensaje de privacidad visible
+
+**Detalle crítico:** si el archivo comprimido resulta mayor que el original (pasa con PDFs ya optimizados), el resultado debe decirlo con claridad: "This PDF is already well optimized. Compression saved 0 bytes." No entregues un archivo más grande sin avisar.
+
+---
+
+### Split PDF
+
+Modos requeridos:
+
+```
+All pages        → genera un PDF por página
+Selected pages   → el usuario selecciona páginas individualmente
+Custom ranges    → "1-3, 5, 7-9"
+Every N pages    → genera grupos de N páginas
+```
+
+El input de custom ranges es donde más bugs aparecen. Valida en tiempo real con feedback visual inmediato. Si el rango es inválido, muéstralo antes de que el usuario pulse el botón.
+
+El resultado cuando son múltiples archivos debe ofrecer:
+- Descarga individual por archivo
+- Descarga ZIP de todos
+
+---
+
+### Rotate PDF
+
+Requisitos funcionales:
+
+- Grid de thumbnails de todas las páginas
+- Indicador visual de rotación actual por página (un badge o el propio thumbnail rotado)
+- Controles por página: rotar 90° izquierda, 90° derecha
+- Acción global: rotar todas las páginas a la vez
+- Reset: volver todas a orientación original
+- Download del PDF con rotaciones aplicadas
+
+**Detalle importante:** la rotación debe reflejarse visualmente en el thumbnail en tiempo real. Si el usuario rota una página y el thumbnail no cambia, no sabe si su acción funcionó.
+
+---
+
+### PDF to JPG
+
+Requisitos funcionales:
+
+- Preview del PDF subido
+- Número de páginas visible
+- Selector de calidad/resolución si es técnicamente viable:
+
+```
+○ 72 dpi (web)
+● 150 dpi (balanced)   ← DEFAULT
+○ 300 dpi (print)
+```
+
+- Progress por página durante conversión
+- Resultados: grid de imágenes generadas
+- Descarga individual por imagen
+- Descarga ZIP cuando hay más de una página
+
+**Caso edge:** si el PDF tiene una sola página, no ofrezcas ZIP. Muestra directamente el botón de descarga del JPG. El ZIP de un solo archivo es mala UX.
+
+---
+
+### JPG to PDF
+
+Requisitos funcionales:
+
+- Upload múltiple (drag & drop + click)
+- Preview cards de cada imagen con nombre y tamaño
+- Reordenar por drag & drop (el orden visual = orden en el PDF)
+- Eliminar imagen individual
+- Clear all
+- Selector de tamaño de página:
+
+```
+● Fit image to page     ← DEFAULT
+○ A4
+○ Letter
+```
+
+- Download del PDF generado
+
+El orden de las imágenes en las cards debe ser el orden de las páginas en el PDF resultante. Hazlo explícito con numeración visible: "1, 2, 3…" en cada card.
+
+---
+
+## Fase 2 — SEO técnico
+
+**No empieces esta fase hasta que las tools funcionen bien.**
+Si Google indexa una herramienta rota, el daño es peor que no estar indexado.
+
+### 2.1 Metadata por página
+
+Cada página necesita estos campos bien rellenados:
+
+```typescript
+export const metadata = {
+  title: "Merge PDF Online Free — PDFNimbus",
+  description: "Combine multiple PDF files into one. Free, fast, and private. No file uploads — processed entirely in your browser.",
+  openGraph: {
+    title: "...",
+    description: "...",
+    url: "https://pdfnimbus.com/tools/merge-pdf",
+    type: "website",
+    images: [{ url: "/og/merge-pdf.png", width: 1200, height: 630 }]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "...",
+    description: "...",
+    images: ["/og/merge-pdf.png"]
+  },
+  alternates: {
+    canonical: "https://pdfnimbus.com/tools/merge-pdf"
+  }
+}
+```
+
+Crea imágenes OG específicas por tool, no uses la misma para todas. Cada tool debe tener su propia imagen en `/public/og/`.
+
+### 2.2 Sitemap dinámico
+
+En Next.js 13+, usa `app/sitemap.ts`:
+
+```typescript
+export default function sitemap(): MetadataRoute.Sitemap {
+  const tools = [
+    'merge-pdf', 'compress-pdf', 'split-pdf',
+    'rotate-pdf', 'pdf-to-jpg', 'jpg-to-pdf'
+  ]
+  
+  return [
+    {
+      url: 'https://pdfnimbus.com',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 1,
+    },
+    ...tools.map(tool => ({
+      url: `https://pdfnimbus.com/tools/${tool}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }))
+  ]
+}
+```
+
+### 2.3 robots.txt
+
+```
+User-agent: *
+Allow: /
+
+Sitemap: https://pdfnimbus.com/sitemap.xml
+```
+
+Verifica que no estés bloqueando accidentalmente `/tools/` o cualquier ruta que quieras indexar. Es un error más común de lo que parece.
+
+### 2.4 Schema markup
+
+El roadmap original no lo mencionaba. Es importante. Añade JSON-LD en cada tool page:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Merge PDF — PDFNimbus",
+  "url": "https://pdfnimbus.com/tools/merge-pdf",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+```
+
+Esto ayuda a Google a entender que es una aplicación web gratuita, lo que puede generar rich results.
+
+---
+
+## Fase 3 — Contenido SEO por herramienta
+
+Cada tool page necesita contenido textual real debajo del área de la herramienta. No es relleno — es lo que le da contexto a Google y responde preguntas reales de usuarios.
+
+Estructura estándar por tool:
+
+```
+H1: [Acción] PDF Online — Free & Private
+Párrafo intro (2-3 líneas, keyword natural)
+
+H2: How to [acción] a PDF
+  H3: Step 1
+  H3: Step 2
+  H3: Step 3
+
+H2: Why use PDFNimbus to [acción] PDFs
+  → Ventajas diferenciadoras (privacidad, velocidad, sin registro)
+
+H2: Frequently Asked Questions
+  → 4-6 preguntas reales con respuestas reales
+```
+
+Keywords por herramienta con intención de búsqueda real:
+
+**Merge PDF:**
+```
+merge pdf online free
+combine pdf files
+join pdf documents
+merge multiple pdf into one
+```
+
+**Compress PDF:**
+```
+compress pdf online
+reduce pdf file size
+compress pdf without losing quality
+make pdf smaller
+```
+
+**Split PDF:**
+```
+split pdf online
+extract pages from pdf
+split pdf into multiple files
+separate pdf pages
+```
+
+**Rotate PDF:**
+```
+rotate pdf online
+rotate pdf pages
+fix pdf orientation
+rotate pdf free
+```
+
+**PDF to JPG:**
+```
+convert pdf to jpg online
+pdf to image converter
+pdf page to jpg
+export pdf as image
+```
+
+**JPG to PDF:**
+```
+jpg to pdf converter
+convert images to pdf
+combine images into pdf
+photos to pdf
+```
+
+No intentes posicionar para todas a la vez. Empieza por las que tienen competencia media — no las más genéricas ("pdf converter") porque tardarás años, y no las hiper-nicho porque no tienen volumen.
+
+---
+
+## Fase 4 — SEO programático
+
+Esta fase solo tiene sentido después de que las fases 2 y 3 estén sólidas.
+
+La idea es crear páginas que ataquen variaciones de keywords con alto volumen pero baja competencia. Ejemplos:
+
+```
+/compress-pdf-for-email
+/merge-pdf-mac
+/split-pdf-into-pages
+/pdf-to-jpg-high-quality
+/compress-pdf-under-1mb
+```
+
+Cada una de estas es una página real con contenido específico que redirige a la herramienta. No son páginas vacías con un iframe — tienen contenido genuino que responde la intención de búsqueda específica.
+
+Para generarlas en Next.js, usa rutas dinámicas con `generateStaticParams` para que sean páginas estáticas indexables.
+
+---
+
+## Fase 5 — Google Search Console
+
+Hazlo el mismo día que el dominio esté en producción. No después.
+
+Pasos:
+
+1. Ir a [search.google.com/search-console](https://search.google.com/search-console)
+2. Añadir propiedad → tipo URL prefix → `https://pdfnimbus.com`
+3. Verificar con el método HTML file (más fiable) o DNS record
+4. Ir a Sitemaps → añadir `sitemap.xml`
+5. Usar "URL Inspection" para solicitar indexación manual de cada tool page
+
+La indexación orgánica tarda entre 1 y 4 semanas. La solicitud manual la acelera a días. Hazla para todas las páginas importantes.
+
+---
+
+## Fase 6 — Backlinks y distribución
+
+Los backlinks tienen que ser genuinos. Google penaliza los artificiales. El objetivo no es volumen, es relevancia.
+
+**Canales con mejor ROI para este tipo de herramienta:**
+
+Product Hunt — lanza cuando las tools estén perfectas, no antes. Una mala demo en Product Hunt es peor que no lanzar.
+
+GitHub — crea un repositorio con README bien escrito, demo gif, y enlace a la web. Los repos de herramientas útiles consiguen stars y tráfico orgánico.
+
+Reddit — específicamente estos subreddits:
+```
+r/productivity
+r/selfhosted
+r/webdev
+r/pdfs (si existe)
+r/software
+```
+
+No hagas spam. Responde preguntas donde tu herramienta sea la solución natural.
+
+Directorios:
+```
+alternativeto.net
+toolify.ai
+there's an ai for that
+futurepedia.io
+```
+
+Estos dan backlinks dofollow y tráfico real de personas buscando herramientas.
+
+---
+
+## Fase 7 — Performance
+
+Las Core Web Vitals afectan directamente al ranking desde 2021. No son opcionales.
+
+Métricas objetivo:
+
+```
+LCP (Largest Contentful Paint):  < 2.5s
+CLS (Cumulative Layout Shift):   < 0.1
+FID / INP:                       < 100ms
+```
+
+Para medir: [PageSpeed Insights](https://pagespeed.web.dev) y Lighthouse en Chrome DevTools.
+
+Para mejorar en Next.js:
+- Usa `next/image` para todas las imágenes
+- Importa PDF.js con dynamic import y `ssr: false` para evitar bundle en servidor
+- Lazy load los componentes de tool pesados
+- Verifica que no hay layout shift en el área de upload cuando carga el componente
+
+---
+
+## Fase 8 — Analytics
+
+Añade analytics desde el inicio para tener datos desde el día uno.
+
+Para un proyecto indie, Plausible es mejor que Google Analytics: más simple, GDPR-compliant por defecto, y no bloqueable por la mayoría de adblockers.
+
+Eventos que debes trackear explícitamente:
+```
+file_uploaded       → tipo de tool
+tool_completed      → tipo de tool, resultado exitoso o no
+file_downloaded     → tipo de tool
+error_occurred      → tipo de tool, tipo de error
+```
+
+Esto te dice qué tools se usan más, dónde falla la gente, y dónde abandonan.
+
+---
+
+## Fase 9 — Más herramientas
+
+Solo añade herramientas nuevas cuando las seis actuales estén sólidas y rankeando.
+
+Orden recomendado por impacto SEO y demanda:
+
+```
+1. pdf-to-word          (altísima demanda, técnicamente complejo)
+2. protect-pdf          (fácil de implementar, buena demanda)
+3. unlock-pdf           (alta demanda, considera implicaciones legales)
+4. watermark-pdf        (demanda media, fácil)
+5. pdf-to-png           (similar a pdf-to-jpg, poca fricción)
+6. word-to-pdf          (muy demandado pero requiere procesado servidor)
+```
+
+Cada tool nueva = nueva página SEO, nuevas keywords, más superficie de indexación.
+
+---
+
+## Fase 10 — Dominio propio
+
+Hazlo cuanto antes. Cada mes en `vercel.app` es un mes construyendo autoridad de dominio en un subdominio que no controlas.
+
+```
+pdfnimbus.com
+```
+
+Namecheap, Cloudflare Registrar, o Porkbun son buenas opciones a ~$10/año.
+
+Una vez comprado, configura en Vercel y añade redirect 301 desde el dominio de Vercel al dominio propio.
+
+---
+
+## Orden de ejecución real
+
+Este es el orden que maximiza resultados:
+
+```
+1. Build limpio + rebranding completo
+2. Tools funcionando al 100%
+3. Dominio propio
+4. Metadata + sitemap + robots + schema
+5. Search Console + indexación manual
+6. Contenido SEO por tool
+7. Analytics
+8. Lanzamiento público (Product Hunt, Reddit, GitHub)
+9. SEO programático
+10. Nuevas tools
+11. Backlinks continuos
+```
+
+---
+
+## Expectativas realistas de tráfico
+
+Con este roadmap ejecutado correctamente:
+
+| Tiempo | Resultado esperado |
+|---|---|
+| Mes 1-2 | Indexación completa, posiciones 20-50 para keywords de cola larga |
+| Mes 3-4 | Primeras posiciones top 10 para keywords nicho, tráfico de 200-500 visitas/mes |
+| Mes 6-9 | Keywords principales en top 10, tráfico de 1000-5000 visitas/mes |
+| Mes 12+ | Autoridad de dominio establecida, tráfico compuesto escalando |
+
+Estas cifras asumen contenido de calidad, herramientas que funcionan bien, y mínimo esfuerzo en backlinks. No son garantías — son rangos realistas basados en proyectos similares.
+
+---
+
+¿Por dónde quieres empezar? Puedo darte los prompts de OpenClaw para cada fase, o profundizar en cualquier punto específico.

@@ -9,7 +9,7 @@
   product: "Producto",
   tools: "Herramientas",
   legal: "Legal",
-  company: "Compania",
+  company: "Compañía",
   about: "Acerca de",
   contact: "Contacto",
   privacyPolicy: "Politica de privacidad",
