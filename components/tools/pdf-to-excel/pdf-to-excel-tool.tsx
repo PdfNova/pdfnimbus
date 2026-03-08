@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { extractPdfRows, pdfToCsv } from "@/lib/pdf/pdf-to-excel";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 
 function isPdfFile(file: File) {
@@ -29,6 +30,7 @@ export function PdfToExcelTool() {
     setFile(nextFile);
     setError(null);
     setSuccess(null);
+    trackToolUploadStarted({ tool_slug: "pdf-to-excel", page_path: "/tools/pdf-to-excel", locale: "en", file_count: 1 });
   };
 
   const downloadBlob = (blob: Blob, name: string) => {
@@ -48,7 +50,9 @@ export function PdfToExcelTool() {
     try {
       const csv = await pdfToCsv(file);
       const name = `${file.name.replace(/\.pdf$/i, "")}.csv`;
+      trackToolDownloadClicked({ tool_slug: "pdf-to-excel", page_path: "/tools/pdf-to-excel", locale: "en", output_format: "csv" });
       downloadBlob(csv, name);
+      trackToolConversionCompleted({ tool_slug: "pdf-to-excel", page_path: "/tools/pdf-to-excel", locale: "en", output_format: "csv" });
       setSuccess(`Done. Downloaded ${name}.`);
     } catch {
       setError("Could not extract table-like text from this PDF in-browser.");
@@ -69,7 +73,9 @@ export function PdfToExcelTool() {
       const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const name = `${file.name.replace(/\.pdf$/i, "")}.xlsx`;
+      trackToolDownloadClicked({ tool_slug: "pdf-to-excel", page_path: "/tools/pdf-to-excel", locale: "en", output_format: "xlsx" });
       downloadBlob(blob, name);
+      trackToolConversionCompleted({ tool_slug: "pdf-to-excel", page_path: "/tools/pdf-to-excel", locale: "en", output_format: "xlsx" });
       setSuccess(`Done. Downloaded ${name}.`);
     } catch {
       setError("Could not generate XLSX from this PDF in-browser.");

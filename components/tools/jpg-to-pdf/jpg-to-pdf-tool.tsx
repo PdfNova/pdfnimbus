@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { imagesToPdf } from "@/lib/pdf/jpg-to-pdf";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 import { useTranslation } from "@/components/i18n-provider";
 
@@ -120,6 +121,7 @@ export function JpgToPdfTool() {
 
       setItems((current) => [...current, ...newItems]);
       setSuccessMessage(null);
+      trackToolUploadStarted({ tool_slug: "jpg-to-pdf", page_path: "/tools/jpg-to-pdf", locale: language, file_count: newItems.length });
     }
   };
 
@@ -194,10 +196,12 @@ export function JpgToPdfTool() {
       link.href = url;
       link.download = "images-to-pdf.pdf";
       document.body.appendChild(link);
+      trackToolDownloadClicked({ tool_slug: "jpg-to-pdf", page_path: "/tools/jpg-to-pdf", locale: language, output_format: "pdf" });
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
 
+      trackToolConversionCompleted({ tool_slug: "jpg-to-pdf", page_path: "/tools/jpg-to-pdf", locale: language, output_format: "pdf" });
       setSuccessMessage(copy.done(items.length, formatMb(outputBlob.size)));
     } catch {
       setError(copy.convertFailed);

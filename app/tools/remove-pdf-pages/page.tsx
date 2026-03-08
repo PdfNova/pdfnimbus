@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { RemovePdfPagesTool } from "@/components/tools/remove-pdf-pages/remove-pdf-pages-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
 
@@ -94,27 +94,7 @@ export default function RemovePdfPagesPage() {
           answer: { en: item.answer, es: item.answer }
         }))}
       >
-        <section className="mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <h2 className="text-lg font-semibold text-slate-900">Upload area</h2>
-          <div className="mt-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-600">
-            Upload placeholder: PDF page-removal UI will appear here.
-          </div>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
-            Remove selected pages from your PDF, then download the updated file. This placeholder keeps route, SEO,
-            and internal-link coverage ready while tool UI is finalized.
-          </p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            <Link href="/guides/remove-pages-from-pdf" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">
-              Guide: Remove pages from PDF
-            </Link>
-            <Link href="/tools/split-pdf" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">
-              Split PDF
-            </Link>
-            <Link href="/tools/merge-pdf" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-700">
-              Merge PDF
-            </Link>
-          </div>
-        </section>
+        <RemovePdfPagesTool />
       </ActiveToolPageFrame>
     </>
   );

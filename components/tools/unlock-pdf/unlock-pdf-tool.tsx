@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { unlockPdfFile, UnlockPdfError } from "@/lib/pdf/unlock-pdf-file";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 
 function isPdfFile(file: File) {
@@ -39,6 +40,7 @@ export function UnlockPdfTool() {
     setFile(nextFile);
     setError(null);
     setSuccess(null);
+    trackToolUploadStarted({ tool_slug: "unlock-pdf", page_path: "/tools/unlock-pdf", locale: "en", file_count: 1 });
   };
 
   const processUnlock = async () => {
@@ -64,9 +66,11 @@ export function UnlockPdfTool() {
       a.href = url;
       a.download = outputName;
       document.body.appendChild(a);
+      trackToolDownloadClicked({ tool_slug: "unlock-pdf", page_path: "/tools/unlock-pdf", locale: "en", output_format: "pdf" });
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      trackToolConversionCompleted({ tool_slug: "unlock-pdf", page_path: "/tools/unlock-pdf", locale: "en", output_format: "pdf" });
       setSuccess(`Done. Generated and downloaded ${outputName}.`);
     } catch (err) {
       if (err instanceof UnlockPdfError) {

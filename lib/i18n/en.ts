@@ -41,6 +41,7 @@
   noFileYet: "No file selected yet",
   toolsMenu: "All tools",
   pdfToolsLabel: "PDF tools",
+  documentToolsLabel: "Document tools",
   imageToolsLabel: "Image tools",
   qrToolsLabel: "QR tools",
   comingSoon: "Soon",

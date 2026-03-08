@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { spreadsheetToPdf, SpreadsheetToPdfError } from "@/lib/pdf/excel-to-pdf";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 
 function isSupported(file: File) {
@@ -30,6 +31,7 @@ export function ExcelToPdfTool() {
     setFile(nextFile);
     setError(null);
     setSuccess(null);
+    trackToolUploadStarted({ tool_slug: "excel-to-pdf", page_path: "/tools/excel-to-pdf", locale: "en", file_count: 1 });
   };
 
   const runExport = async () => {
@@ -48,9 +50,11 @@ export function ExcelToPdfTool() {
       a.href = url;
       a.download = name;
       document.body.appendChild(a);
+      trackToolDownloadClicked({ tool_slug: "excel-to-pdf", page_path: "/tools/excel-to-pdf", locale: "en", output_format: "pdf" });
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      trackToolConversionCompleted({ tool_slug: "excel-to-pdf", page_path: "/tools/excel-to-pdf", locale: "en", output_format: "pdf" });
       setSuccess(`Done. Downloaded ${name}.`);
     } catch (error) {
       if (error instanceof SpreadsheetToPdfError) {

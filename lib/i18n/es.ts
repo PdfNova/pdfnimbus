@@ -41,6 +41,7 @@
   noFileYet: "Aun no hay archivo seleccionado",
   toolsMenu: "Todas las herramientas",
   pdfToolsLabel: "Herramientas PDF",
+  documentToolsLabel: "Herramientas de documento",
   imageToolsLabel: "Herramientas de imagen",
   qrToolsLabel: "Herramientas QR",
   comingSoon: "Pronto",

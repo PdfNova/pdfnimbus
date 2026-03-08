@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import JSZip from "jszip";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { pdfToJpgFiles } from "@/lib/pdf/pdf-to-jpg";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 import { useTranslation } from "@/components/i18n-provider";
@@ -28,12 +29,13 @@ function formatMb(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function downloadBlob(blob: Blob, fileName: string) {
+function downloadBlob(blob: Blob, fileName: string, onDownload?: () => void) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
   document.body.appendChild(link);
+  onDownload?.();
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
@@ -147,6 +149,7 @@ export function PdfToJpgTool() {
       const nextPreview = await generatePdfPreview(selected);
       setFile(selected);
       setPreview(nextPreview);
+      trackToolUploadStarted({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, file_count: 1 });
     } catch {
       setFile(null);
       setPreview(null);
@@ -183,10 +186,11 @@ export function PdfToJpgTool() {
 
       setOutputs(nextOutputs);
       const totalOutputBytes = jpgBlobs.reduce((sum, blob) => sum + blob.size, 0);
+      trackToolConversionCompleted({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, output_format: nextOutputs.length > 1 ? "jpg_zip_or_multiple" : "jpg" });
       setSuccessMessage(copy.done(jpgBlobs.length, formatMb(totalOutputBytes)));
 
       if (nextOutputs.length === 1) {
-        downloadBlob(nextOutputs[0].blob, nextOutputs[0].name);
+        downloadBlob(nextOutputs[0].blob, nextOutputs[0].name, () => trackToolDownloadClicked({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, output_format: "jpg" }));
       }
     } catch {
       setError(copy.convertFailed);
@@ -205,7 +209,7 @@ export function PdfToJpgTool() {
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
     const baseName = file?.name.replace(/\.pdf$/i, "") ?? "pdf-images";
-    downloadBlob(zipBlob, `${baseName}-jpg-pages.zip`);
+    downloadBlob(zipBlob, `${baseName}-jpg-pages.zip`, () => trackToolDownloadClicked({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, output_format: "zip" }));
   };
 
   const validateAndLoad = (selected: File | undefined) => {
@@ -314,7 +318,7 @@ export function PdfToJpgTool() {
                     <span className="truncate">{item.name}</span>
                     <button
                       type="button"
-                      onClick={() => downloadBlob(item.blob, item.name)}
+                      onClick={() => downloadBlob(item.blob, item.name, () => trackToolDownloadClicked({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, output_format: "jpg" }))}
                       className="rounded border border-slate-300 px-2 py-1 font-medium text-slate-700 hover:border-brand-500 hover:text-brand-700"
                     >
                       {copy.downloadOne}
@@ -359,7 +363,7 @@ export function PdfToJpgTool() {
               type="button"
               onClick={() => {
                 if (outputs.length === 1) {
-                  downloadBlob(outputs[0].blob, outputs[0].name);
+                  downloadBlob(outputs[0].blob, outputs[0].name, () => trackToolDownloadClicked({ tool_slug: "pdf-to-jpg", page_path: "/tools/pdf-to-jpg", locale: language, output_format: "jpg" }));
                   return;
                 }
                 void downloadZip();

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { useTranslation } from "@/components/i18n-provider";
+import { trackToolPageViewed } from "@/lib/analytics";
 import type { Language } from "@/lib/i18n";
 
 type LocalizedText = Record<Language, string>;
@@ -59,6 +61,14 @@ export function ActiveToolPageFrame({
   children
 }: ActiveToolPageFrameProps) {
   const { language, t } = useTranslation();
+
+  useEffect(() => {
+    trackToolPageViewed({
+      tool_slug: currentToolHref.replace("/tools/", ""),
+      page_path: currentToolHref,
+      locale: language
+    });
+  }, [currentToolHref, language]);
 
   return (
     <main className="mx-auto w-full max-w-[1620px] px-2 py-3 sm:px-3 sm:py-4 lg:px-4">

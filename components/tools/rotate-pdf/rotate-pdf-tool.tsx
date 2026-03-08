@@ -8,6 +8,7 @@ import {
   type RotationAngle,
   type RotationStep
 } from "@/lib/pdf/rotate-pdf-file";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 import { useTranslation } from "@/components/i18n-provider";
 
@@ -180,6 +181,7 @@ export function RotatePdfTool() {
       setFile(selectedFile);
       setPageCount(count);
       setPagePreviews(previews);
+      trackToolUploadStarted({ tool_slug: "rotate-pdf", page_path: "/tools/rotate-pdf", locale: language, file_count: 1 });
       setPageRotations(Array.from({ length: count }, () => 0));
 
       if (incomingFiles.length > 1) {
@@ -229,10 +231,12 @@ export function RotatePdfTool() {
       link.href = url;
       link.download = outputName;
       document.body.appendChild(link);
+      trackToolDownloadClicked({ tool_slug: "rotate-pdf", page_path: "/tools/rotate-pdf", locale: language, output_format: "pdf" });
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
 
+      trackToolConversionCompleted({ tool_slug: "rotate-pdf", page_path: "/tools/rotate-pdf", locale: language, output_format: "pdf" });
       setSuccessMessage(copy.success(outputName));
     } catch {
       setError(copy.rotationFailed);

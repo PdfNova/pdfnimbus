@@ -19,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const activeTools = toolRegistry.filter((tool) => tool.active);
   const panelPdfTools = toolRegistry.filter((tool) => tool.category === "pdf");
+  const panelDocumentTools = toolRegistry.filter((tool) => tool.category === "document");
   const panelImageTools = toolRegistry.filter((tool) => tool.category === "image");
   const panelQrTools = toolRegistry.filter((tool) => tool.category === "qr");
 
@@ -74,6 +75,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </h3>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       {panelPdfTools.map((tool) => (
+                        <div key={tool.href}>
+                          {tool.active ? (
+                            <Link
+                              href={tool.href}
+                              className="block rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-800"
+                            >
+                              <p className="font-semibold">{t(tool.labelKey)}</p>
+                              <p className="mt-0.5 text-[11px] text-slate-500">{t(tool.descriptionKey)}</p>
+                            </Link>
+                          ) : (
+                            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
+                              <p className="font-semibold">{t(tool.labelKey)}</p>
+                              <p className="mt-0.5 text-[11px]">{t("comingSoon")}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section>
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      {t("documentToolsLabel")}
+                    </h3>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      {panelDocumentTools.map((tool) => (
                         <div key={tool.href}>
                           {tool.active ? (
                             <Link

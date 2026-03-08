@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { pdfToPowerPoint } from "@/lib/pdf/pdf-to-powerpoint";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 
 function isPdfFile(file: File) {
@@ -21,6 +22,7 @@ export function PdfToPowerPointTool() {
     if (!isPdfFile(nextFile)) return setError(`Only PDF files are allowed. Invalid file: ${nextFile.name}`);
     if (isFileTooLarge(nextFile)) return setError(`Max file size is ${formatFileLimit()}. Too large: ${nextFile.name}`);
     setFile(nextFile); setError(null); setSuccess(null);
+    trackToolUploadStarted({ tool_slug: "pdf-to-powerpoint", page_path: "/tools/pdf-to-powerpoint", locale: "en", file_count: 1 });
   };
 
   const runConversion = async () => {
@@ -30,7 +32,8 @@ export function PdfToPowerPointTool() {
       const blob = await pdfToPowerPoint(file);
       const name = `${file.name.replace(/\.pdf$/i, "")}.pptx`;
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); trackToolDownloadClicked({ tool_slug: "pdf-to-powerpoint", page_path: "/tools/pdf-to-powerpoint", locale: "en", output_format: "pptx" }); a.click(); a.remove(); URL.revokeObjectURL(url);
+      trackToolConversionCompleted({ tool_slug: "pdf-to-powerpoint", page_path: "/tools/pdf-to-powerpoint", locale: "en", output_format: "pptx" });
       setSuccess(`Done. Downloaded ${name}.`);
     } catch {
       setError("Could not convert this PDF to PowerPoint in-browser.");

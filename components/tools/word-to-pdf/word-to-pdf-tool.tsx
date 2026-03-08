@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { wordToPdf, WordToPdfError } from "@/lib/pdf/word-to-pdf";
+import { trackToolConversionCompleted, trackToolDownloadClicked, trackToolUploadStarted } from "@/lib/analytics";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
 
 function isSupported(file: File) {
@@ -22,6 +23,7 @@ export function WordToPdfTool() {
     if (!isSupported(nextFile)) return setError(`Please upload a DOCX or TXT file. Invalid file: ${nextFile.name}`);
     if (isFileTooLarge(nextFile)) return setError(`Max file size is ${formatFileLimit()}. Too large: ${nextFile.name}`);
     setFile(nextFile); setError(null); setSuccess(null);
+    trackToolUploadStarted({ tool_slug: "word-to-pdf", page_path: "/tools/word-to-pdf", locale: "en", file_count: 1 });
   };
 
   const runConversion = async () => {
@@ -31,7 +33,8 @@ export function WordToPdfTool() {
       const blob = await wordToPdf(file);
       const name = `${file.name.replace(/\.(docx|txt)$/i, "")}.pdf`;
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); trackToolDownloadClicked({ tool_slug: "word-to-pdf", page_path: "/tools/word-to-pdf", locale: "en", output_format: "pdf" }); a.click(); a.remove(); URL.revokeObjectURL(url);
+      trackToolConversionCompleted({ tool_slug: "word-to-pdf", page_path: "/tools/word-to-pdf", locale: "en", output_format: "pdf" });
       setSuccess(`Done. Downloaded ${name}.`);
     } catch (error) {
       if (error instanceof WordToPdfError) setError(error.message);
