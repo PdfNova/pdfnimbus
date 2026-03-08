@@ -3,6 +3,12 @@ import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mj
 GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 
+export type ExtractedPdfRow = {
+  page: number;
+  row: number;
+  text: string;
+};
+
 function csvEscape(value: string) {
   const normalized = value.replace(/\r?\n/g, " ").trim();
   if (/[",]/.test(normalized)) {
@@ -11,10 +17,10 @@ function csvEscape(value: string) {
   return normalized;
 }
 
-export async function pdfToCsv(file: File): Promise<Blob> {
+export async function extractPdfRows(file: File): Promise<ExtractedPdfRow[]> {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const pdf = await getDocument({ data: bytes }).promise;
-  const rows: string[] = ["page,row,text"];
+  const rows: ExtractedPdfRow[] = [];
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
@@ -30,7 +36,6 @@ export async function pdfToCsv(file: File): Promise<Blob> {
       .sort((a, b) => (b.y - a.y) || (a.x - b.x));
 
     const grouped = new Map<number, string[]>();
-
     items.forEach((item) => {
       const key = item.y;
       const existing = grouped.get(key) ?? [];
@@ -38,10 +43,16 @@ export async function pdfToCsv(file: File): Promise<Blob> {
       grouped.set(key, existing);
     });
 
-    Array.from(grouped.entries()).forEach(([y, texts], index) => {
-      rows.push(`${pageNumber},${index + 1},${csvEscape(texts.join(" "))}`);
+    Array.from(grouped.values()).forEach((texts, index) => {
+      rows.push({ page: pageNumber, row: index + 1, text: texts.join(" ") });
     });
   }
 
-  return new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+  return rows;
+}
+
+export async function pdfToCsv(file: File): Promise<Blob> {
+  const rows = await extractPdfRows(file);
+  const csvRows = ["page,row,text", ...rows.map((row) => `${row.page},${row.row},${csvEscape(row.text)}`)];
+  return new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8" });
 }

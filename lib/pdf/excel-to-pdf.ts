@@ -8,21 +8,33 @@ function parseDelimitedText(text: string) {
   return lines.map((line) => line.split(delimiter).map((cell) => cell.trim()));
 }
 
+async function rowsFromXlsx(file: File): Promise<string[][]> {
+  const XLSX = await import("xlsx");
+  const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+  const firstSheet = workbook.SheetNames[0];
+  if (!firstSheet) throw new SpreadsheetToPdfError("The uploaded spreadsheet appears to be empty.");
+  const sheet = workbook.Sheets[firstSheet];
+  const rows = XLSX.utils.sheet_to_json<(string | number | boolean | null)[]>(sheet, {
+    header: 1,
+    raw: false,
+    blankrows: false
+  });
+  return rows
+    .map((row) => row.map((cell) => (cell ?? "").toString().trim()))
+    .filter((row) => row.some((cell) => cell.length > 0));
+}
+
 export async function spreadsheetToPdf(file: File): Promise<Blob> {
   const lower = file.name.toLowerCase();
 
+  let rows: string[][];
   if (lower.endsWith(".xlsx")) {
-    throw new SpreadsheetToPdfError(
-      "XLSX parsing is not available in the current browser-only stack. Please export the sheet as CSV first."
-    );
+    rows = await rowsFromXlsx(file);
+  } else if (lower.endsWith(".csv") || lower.endsWith(".txt") || lower.endsWith(".tsv")) {
+    rows = parseDelimitedText(await file.text());
+  } else {
+    throw new SpreadsheetToPdfError("Please upload a CSV, TSV, TXT, or XLSX spreadsheet file.");
   }
-
-  if (!lower.endsWith(".csv") && !lower.endsWith(".txt") && !lower.endsWith(".tsv")) {
-    throw new SpreadsheetToPdfError("Please upload a CSV, TSV, or plain text table file.");
-  }
-
-  const text = await file.text();
-  const rows = parseDelimitedText(text);
 
   if (rows.length === 0) {
     throw new SpreadsheetToPdfError("The uploaded spreadsheet appears to be empty.");
@@ -38,8 +50,9 @@ export async function spreadsheetToPdf(file: File): Promise<Blob> {
   const rowHeight = 20;
   const fontSize = 9;
   const maxColumns = Math.max(...rows.map((row) => row.length), 1);
+  const displayColumns = Math.min(maxColumns, 6);
   const usableWidth = page.getWidth() - margin * 2;
-  const colWidth = usableWidth / Math.min(maxColumns, 6);
+  const colWidth = usableWidth / displayColumns;
 
   rows.forEach((row, rowIndex) => {
     if (y < 60) {
@@ -57,7 +70,7 @@ export async function spreadsheetToPdf(file: File): Promise<Blob> {
       borderWidth: 0.5
     });
 
-    row.slice(0, 6).forEach((cell, colIndex) => {
+    row.slice(0, displayColumns).forEach((cell, colIndex) => {
       const drawFont = rowIndex === 0 ? boldFont : font;
       const clean = cell.length > 24 ? `${cell.slice(0, 21)}...` : cell;
       page.drawText(clean, {
