@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: brand.description,
 
   verification: {
-    google: "rnDCA-nrQ8qJoG_SvXw"
+    google: "rnDCA-nrQ8qJoG"
   },
 
   openGraph: {
