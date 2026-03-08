@@ -8,11 +8,18 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+
   title: {
     default: brand.name,
     template: `%s | ${brand.name}`
   },
+
   description: brand.description,
+
+  verification: {
+    google: "rnDCA-nrQ8qJoG_SvXw"
+  },
+
   openGraph: {
     title: brand.name,
     description: brand.description,
@@ -62,4 +69,3 @@ export default function RootLayout({
     </html>
   );
 }
-
