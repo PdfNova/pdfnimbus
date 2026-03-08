@@ -271,7 +271,7 @@ export function MergePdfTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -290,7 +290,7 @@ export function MergePdfTool() {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-7 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -327,7 +327,13 @@ export function MergePdfTool() {
         </div>
       ) : null}
 
-      <div className={`mt-4 grid gap-4 ${items.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]" : "grid-cols-1"}`}>
+      <div
+        className={`mt-3 grid gap-3 ${
+          items.length > 0
+            ? "lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]"
+            : "grid-cols-1"
+        }`}
+      >
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-base font-semibold text-slate-900">{copy.filesTitle(items.length)}</h2>
@@ -358,7 +364,7 @@ export function MergePdfTool() {
                 <span className="mx-2 text-slate-400">-</span>
                 <span>{copy.orderHint}</span>
               </div>
-              <ul className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">
+              <ul className="grid grid-cols-2 gap-2 md:grid-cols-3 2xl:grid-cols-4">
                 {items.map((item, index) => (
                   <li
                     key={item.id}
@@ -411,7 +417,7 @@ export function MergePdfTool() {
                       <img
                         src={item.previewDataUrl}
                         alt={copy.previewAlt(item.file.name)}
-                        className="mx-auto h-36 w-full object-contain"
+                        className="mx-auto h-40 w-full object-contain"
                       />
                     </div>
 
@@ -427,7 +433,7 @@ export function MergePdfTool() {
           )}
         </div>
 
-        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/70 p-3">
             <div className="mb-2 flex items-center gap-2">
               <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { QrGeneratorTool } from "@/components/tools/qr-generator/qr-generator-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -35,7 +35,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova QR Generator",
+  name: "PDFNimbus QR Generator",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -94,3 +94,4 @@ export default function QrGeneratorPage() {
     </>
   );
 }
+

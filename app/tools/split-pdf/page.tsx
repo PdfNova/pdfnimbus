@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { SplitPdfTool } from "@/components/tools/split-pdf/split-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -35,7 +35,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova Split PDF",
+  name: "PDFNimbus Split PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -66,6 +66,29 @@ export default function SplitPdfPage() {
           en: "Upload a PDF, choose split mode, then download one or multiple output files.",
           es: "Sube un PDF, elige el modo de division y descarga uno o varios archivos."
         }}
+        introParagraphs={[
+          {
+            en: "Split PDF pages online when you only need part of a document. Choose all pages, selected pages, custom ranges, or every-N mode depending on your workflow.",
+            es: "Divide paginas PDF online cuando solo necesitas una parte del documento. Elige todas las paginas, paginas seleccionadas, rangos personalizados o modo cada-N segun tu flujo."
+          },
+          {
+            en: "Visual thumbnails and range controls help you confirm output before download, with browser-first processing for typical tasks.",
+            es: "Las miniaturas visuales y controles de rango te ayudan a confirmar la salida antes de descargar, con procesamiento browser-first para tareas normales."
+          }
+        ]}
+        benefitsTitle={{ en: "Why use this Split PDF tool", es: "Por que usar esta herramienta de dividir PDF" }}
+        benefitsItems={[
+          { en: "Multiple split modes in one tool", es: "Varios modos de division en una sola herramienta" },
+          { en: "Page thumbnail selection for precision", es: "Seleccion por miniaturas para mayor precision" },
+          { en: "Custom ranges with validation", es: "Rangos personalizados con validacion" },
+          { en: "Fast browser-first output", es: "Salida rapida browser-first" }
+        ]}
+        relatedToolsTitle={{ en: "Related PDF tools", es: "Herramientas PDF relacionadas" }}
+        relatedTools={[
+          { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
+          { href: "/tools/rotate-pdf", label: { en: "Rotate PDF", es: "Rotar PDF" } },
+          { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } }
+        ]}
         faqItems={[
           {
             question: {
@@ -86,6 +109,26 @@ export default function SplitPdfPage() {
               en: "For typical use, processing happens directly in your browser and files are not stored on our servers.",
               es: "Para uso normal, el procesamiento ocurre en tu navegador y no guardamos archivos en servidores."
             }
+          },
+          {
+            question: {
+              en: "Can I split by custom page ranges?",
+              es: "Puedo dividir por rangos de pagina personalizados?"
+            },
+            answer: {
+              en: "Yes. You can define one or more ranges and export them separately or combined.",
+              es: "Si. Puedes definir uno o varios rangos y exportarlos por separado o combinados."
+            }
+          },
+          {
+            question: {
+              en: "Does it work on mobile browsers?",
+              es: "Funciona en navegadores moviles?"
+            },
+            answer: {
+              en: "Yes, though page-heavy files are generally easier to handle on desktop.",
+              es: "Si, aunque archivos con muchas paginas suelen manejarse mejor en escritorio."
+            }
           }
         ]}
       >
@@ -94,3 +137,4 @@ export default function SplitPdfPage() {
     </>
   );
 }
+

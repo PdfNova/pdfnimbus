@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
@@ -106,6 +106,8 @@ export function QrGeneratorTool() {
           previewEmpty: "Ingresa datos para generar un codigo QR.",
           downloadPng: "Descargar PNG",
           downloadSvg: "Descargar SVG",
+          trustTitle: "Seguro. Privado. Bajo tu control.",
+          trustItems: ["Generacion local", "Sin almacenamiento", "Descarga directa"],
           optionsTitle: "Opciones QR",
           types: {
             url: { label: "URL", hint: "Generar QR para enlaces" },
@@ -139,6 +141,8 @@ export function QrGeneratorTool() {
           previewEmpty: "Enter input to generate a QR code.",
           downloadPng: "Download PNG",
           downloadSvg: "Download SVG",
+          trustTitle: "Secure. Private. Under your control.",
+          trustItems: ["Local generation", "No storage", "Direct download"],
           optionsTitle: "QR options",
           types: {
             url: { label: "URL", hint: "Generate a QR for links" },
@@ -248,22 +252,22 @@ export function QrGeneratorTool() {
   }, [copy.generationError, darkColor, lightColor, margin, qrPayload, size]);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       {error ? (
         <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h2 className="text-sm font-semibold text-slate-900">{copy.previewTitle}</h2>
           <p className="mt-1 text-xs text-slate-600">{copy.previewHint}</p>
 
-          <div className="mt-3 flex min-h-[340px] items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
+          <div className="mt-3 flex min-h-[400px] items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
             {pngDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={pngDataUrl} alt={copy.previewAlt} className="h-auto w-full max-w-[340px] object-contain" />
+              <img src={pngDataUrl} alt={copy.previewAlt} className="h-auto w-full max-w-[420px] object-contain" />
             ) : (
               <p className="text-sm text-slate-500">{copy.previewEmpty}</p>
             )}
@@ -275,7 +279,7 @@ export function QrGeneratorTool() {
               disabled={!pngDataUrl}
               onClick={() => {
                 if (!pngDataUrl) return;
-                downloadDataUrl(pngDataUrl, "pdfnova-qr.png");
+                downloadDataUrl(pngDataUrl, "PDFNimbus-qr.png");
                 trackToolUsed("qr_generator");
                 trackDownloadGenerated("qr_generator", "png");
                 trackEvent("qr_generator_complete", { input_type: inputType, format: "png" });
@@ -290,7 +294,7 @@ export function QrGeneratorTool() {
               disabled={!svgContent}
               onClick={() => {
                 if (!svgContent) return;
-                downloadTextFile(svgContent, "pdfnova-qr.svg", "image/svg+xml;charset=utf-8");
+                downloadTextFile(svgContent, "PDFNimbus-qr.svg", "image/svg+xml;charset=utf-8");
                 trackToolUsed("qr_generator");
                 trackDownloadGenerated("qr_generator", "svg");
                 trackEvent("qr_generator_complete", { input_type: inputType, format: "svg" });
@@ -300,9 +304,18 @@ export function QrGeneratorTool() {
               {copy.downloadSvg}
             </button>
           </div>
+
+          <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-900">{copy.trustTitle}</h3>
+            <div className="mt-2 grid gap-1.5 text-xs text-slate-600 sm:grid-cols-3">
+              {copy.trustItems.map((item) => (
+                <p key={item}>{item}</p>
+              ))}
+            </div>
+          </div>
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.optionsTitle}</h2>
 
           <div className="mt-3 grid gap-2">
@@ -453,3 +466,4 @@ export function QrGeneratorTool() {
     </section>
   );
 }
+

@@ -14,16 +14,21 @@ export async function getPdfPageCount(file: File): Promise<number> {
 
 export async function rotatePdfFile(
   file: File,
-  angle: RotationAngle
+  angleOrPerPage: RotationAngle | RotationAngle[]
 ): Promise<Blob> {
   const sourceBytes = await file.arrayBuffer();
   const document = await PDFDocument.load(sourceBytes, {
     ignoreEncryption: true
   });
 
-  document.getPages().forEach((page) => {
+  const perPageAngles = Array.isArray(angleOrPerPage)
+    ? angleOrPerPage
+    : document.getPages().map(() => angleOrPerPage);
+
+  document.getPages().forEach((page, index) => {
     const currentAngle = page.getRotation().angle;
-    page.setRotation(pdfDegrees((currentAngle + angle) % 360));
+    const pageAngle = perPageAngles[index] ?? 0;
+    page.setRotation(pdfDegrees((currentAngle + pageAngle) % 360));
   });
 
   const outputBytes = await document.save({

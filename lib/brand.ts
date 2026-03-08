@@ -1,6 +1,7 @@
-export const brand = {
-  name: "PDFNova",
-  tagline: "Fast browser-first document tools",
+﻿export const brand = {
+  name: "PDFNimbus",
+  tagline: "Free browser-first PDF tools.",
   description:
-    "PDFNova offers fast, browser-first document tools with privacy-friendly workflows and instant downloads."
+    "PDFNimbus offers fast, browser-first document tools with privacy-friendly workflows and instant downloads."
 } as const;
+

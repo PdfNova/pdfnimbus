@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { CompressImageTool } from "@/components/tools/compress-image/compress-image-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -34,7 +34,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova Compress Image",
+  name: "PDFNimbus Compress Image",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -93,3 +93,4 @@ export default function CompressImagePage() {
     </>
   );
 }
+

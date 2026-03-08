@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import imageCompression from "browser-image-compression";
@@ -89,6 +89,7 @@ export function CompressImageTool() {
       ? {
           uploadMore: "Agregar mas imagenes",
           uploadFirst: "Selecciona imagenes o sueltalas aqui",
+          uploadHint: "Procesamiento local para JPG, PNG y mas formatos de imagen.",
           imagePreview: "Vista de imagenes",
           noImages: "Aun no hay imagenes cargadas.",
           original: "Original",
@@ -112,6 +113,7 @@ export function CompressImageTool() {
       : {
           uploadMore: "Add more images",
           uploadFirst: "Select images or drop them here",
+          uploadHint: "Browser-first processing for JPG, PNG, and more image formats.",
           imagePreview: "Image preview",
           noImages: "No images uploaded yet.",
           original: "Original",
@@ -227,12 +229,12 @@ export function CompressImageTool() {
     });
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
-    downloadBlob(zipBlob, "pdfnova-compressed-images.zip");
+    downloadBlob(zipBlob, "PDFNimbus-compressed-images.zip");
     trackDownloadGenerated("compress_image", "zip");
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       {error ? (
         <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
       ) : null}
@@ -248,7 +250,7 @@ export function CompressImageTool() {
           setIsDragging(false);
           handleFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`mb-4 block cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+        className={`mb-3 block cursor-pointer rounded-xl border-2 border-dashed px-4 py-5 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -267,9 +269,10 @@ export function CompressImageTool() {
         <span className="block text-sm font-semibold text-slate-700">
           {items.length > 0 ? copy.uploadMore : copy.uploadFirst}
         </span>
+        <span className="mt-1.5 block text-xs text-slate-500">{copy.uploadHint}</span>
       </label>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h2 className="text-sm font-semibold text-slate-900">{copy.imagePreview}</h2>
           {items.length === 0 ? (
@@ -306,7 +309,7 @@ export function CompressImageTool() {
           )}
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.options}</h2>
           <div className="mt-3 space-y-2">
             {LEVEL_OPTIONS.map((option) => (
@@ -348,3 +351,4 @@ export function CompressImageTool() {
     </section>
   );
 }
+

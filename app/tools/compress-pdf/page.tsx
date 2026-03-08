@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { CompressPdfTool } from "@/components/tools/compress-pdf/compress-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -41,7 +41,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova Compress PDF",
+  name: "PDFNimbus Compress PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -72,6 +72,29 @@ export default function CompressPdfPage() {
           en: "Upload one PDF, pick a compression level, then download the optimized output.",
           es: "Sube un PDF, elige un nivel de compresion y descarga el resultado optimizado."
         }}
+        introParagraphs={[
+          {
+            en: "Compress PDF online to reduce file size for email, messaging, and uploads without switching apps. Upload one file, choose your compression level, and download the optimized result in seconds.",
+            es: "Comprime PDF online para reducir peso y compartir por email, mensajeria o subidas sin cambiar de app. Sube un archivo, elige nivel de compresion y descarga el resultado optimizado en segundos."
+          },
+          {
+            en: "For typical use, processing stays browser-first so you keep control of your documents while balancing quality and size.",
+            es: "Para uso normal, el procesamiento es browser-first para mantener control de tus documentos mientras equilibras calidad y tamano."
+          }
+        ]}
+        benefitsTitle={{ en: "Why use this Compress PDF tool", es: "Por que usar esta herramienta de comprimir PDF" }}
+        benefitsItems={[
+          { en: "Visible before/after size impact", es: "Impacto de tamano visible antes/despues" },
+          { en: "Compression levels for different needs", es: "Niveles de compresion para diferentes necesidades" },
+          { en: "Direct optimized PDF download", es: "Descarga directa del PDF optimizado" },
+          { en: "Browser-first workflow for normal use", es: "Flujo browser-first para uso normal" }
+        ]}
+        relatedToolsTitle={{ en: "Related PDF tools", es: "Herramientas PDF relacionadas" }}
+        relatedTools={[
+          { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
+          { href: "/tools/split-pdf", label: { en: "Split PDF", es: "Dividir PDF" } },
+          { href: "/tools/pdf-to-jpg", label: { en: "PDF to JPG", es: "PDF a JPG" } }
+        ]}
         faqItems={[
           {
             question: {
@@ -102,6 +125,16 @@ export default function CompressPdfPage() {
               en: "It depends on the selected level. Recommended mode balances quality and size reduction.",
               es: "Depende del nivel elegido. El modo recomendado equilibra calidad y reduccion."
             }
+          },
+          {
+            question: {
+              en: "Can I compress PDF files on mobile?",
+              es: "Puedo comprimir PDF en movil?"
+            },
+            answer: {
+              en: "Yes, the tool works on modern mobile browsers, with better performance on desktop for large files.",
+              es: "Si, funciona en navegadores moviles modernos, con mejor rendimiento en escritorio para archivos grandes."
+            }
           }
         ]}
       >
@@ -110,3 +143,4 @@ export default function CompressPdfPage() {
     </>
   );
 }
+

@@ -1,12 +1,12 @@
-# PDFNova
+﻿# PDFNimbus
 
-PDFNova is a browser-first document tools suite focused on fast, private workflows for PDFs, images, and QR generation.
+PDFNimbus is a browser-first document tools suite focused on fast, private workflows for PDFs, images, and QR generation.
 
 ## Project Description
 
-PDFNova provides practical file tools with a product-style UX:
+PDFNimbus provides practical file tools with a product-style UX:
 - Merge, split, rotate, and compress PDFs
-- Convert PDF ↔ images
+- Convert PDF â†” images
 - Generate QR codes
 - Compress images
 
@@ -72,7 +72,7 @@ npm run lint
 
 ## Deployment (Vercel)
 
-PDFNova is ready for Vercel deployment.
+PDFNimbus is ready for Vercel deployment.
 
 ### Deploy to Vercel
 
@@ -104,3 +104,4 @@ git push -u origin main
 ```
 
 > This project does not push automatically.
+

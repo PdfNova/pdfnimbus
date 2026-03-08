@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { toolRegistry } from "@/lib/tools-registry";
@@ -6,17 +6,17 @@ import { useTranslation } from "@/components/i18n-provider";
 
 const TOOL_LINKS = toolRegistry.filter((tool) => tool.active);
 
-type PdfNovaToolsGridProps = {
+type PDFNimbusToolsGridProps = {
   currentToolHref?: string;
 };
 
-export function PdfNovaToolsGrid({ currentToolHref }: PdfNovaToolsGridProps) {
+export function PDFNimbusToolsGrid({ currentToolHref }: PDFNimbusToolsGridProps) {
   const { t } = useTranslation();
 
   return (
     <section className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900">{t("pdfnovaTools")}</h2>
+        <h2 className="text-sm font-semibold text-slate-900">{t("PDFNimbusTools")}</h2>
         <Link href="/tools" className="text-xs font-semibold text-brand-600 hover:text-brand-700">
           {t("viewAll")}
         </Link>
@@ -52,3 +52,4 @@ export function PdfNovaToolsGrid({ currentToolHref }: PdfNovaToolsGridProps) {
     </section>
   );
 }
+

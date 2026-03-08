@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { RotatePdfTool } from "@/components/tools/rotate-pdf/rotate-pdf-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -35,7 +35,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova Rotate PDF",
+  name: "PDFNimbus Rotate PDF",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -66,6 +66,29 @@ export default function RotatePdfPage() {
           en: "Upload a PDF, choose rotation angle, preview updates, then download.",
           es: "Sube un PDF, elige el angulo, revisa cambios y descarga."
         }}
+        introParagraphs={[
+          {
+            en: "Rotate PDF pages online with visual control before export. You can adjust orientation per page or apply a global rotation step to all pages quickly.",
+            es: "Rota paginas PDF online con control visual antes de exportar. Puedes ajustar la orientacion por pagina o aplicar un giro global a todas las paginas rapidamente."
+          },
+          {
+            en: "This browser-first workflow is useful for scanned documents, sideways pages, and mixed-orientation files where readability matters.",
+            es: "Este flujo browser-first es util para documentos escaneados, paginas laterales y archivos con orientaciones mixtas donde la legibilidad importa."
+          }
+        ]}
+        benefitsTitle={{ en: "Why use this Rotate PDF tool", es: "Por que usar esta herramienta de rotar PDF" }}
+        benefitsItems={[
+          { en: "Per-page visual rotation controls", es: "Controles visuales de rotacion por pagina" },
+          { en: "Global rotate-all and reset actions", es: "Acciones globales de rotar todo y restablecer" },
+          { en: "Preview-first workflow before download", es: "Flujo con vista previa antes de descargar" },
+          { en: "Browser-first document handling", es: "Gestion de documentos browser-first" }
+        ]}
+        relatedToolsTitle={{ en: "Related PDF tools", es: "Herramientas PDF relacionadas" }}
+        relatedTools={[
+          { href: "/tools/split-pdf", label: { en: "Split PDF", es: "Dividir PDF" } },
+          { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } },
+          { href: "/tools/compress-pdf", label: { en: "Compress PDF", es: "Comprimir PDF" } }
+        ]}
         faqItems={[
           {
             question: {
@@ -86,6 +109,26 @@ export default function RotatePdfPage() {
               en: "For typical use, processing stays in your browser and files are not stored on our servers.",
               es: "Para uso normal, el procesamiento queda en tu navegador y no guardamos archivos en servidores."
             }
+          },
+          {
+            question: {
+              en: "Can I rotate only specific pages?",
+              es: "Puedo rotar solo paginas especificas?"
+            },
+            answer: {
+              en: "Yes. You can apply rotation controls per page before downloading the final file.",
+              es: "Si. Puedes aplicar controles de rotacion por pagina antes de descargar el archivo final."
+            }
+          },
+          {
+            question: {
+              en: "Does this work on mobile devices?",
+              es: "Funciona en dispositivos moviles?"
+            },
+            answer: {
+              en: "Yes, on modern mobile browsers, with the best handling experience on desktop for larger PDFs.",
+              es: "Si, en navegadores moviles modernos, con mejor experiencia en escritorio para PDFs grandes."
+            }
           }
         ]}
       >
@@ -94,3 +137,4 @@ export default function RotatePdfPage() {
     </>
   );
 }
+

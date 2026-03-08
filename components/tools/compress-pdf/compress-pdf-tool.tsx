@@ -106,6 +106,7 @@ export function CompressPdfTool() {
       ? {
           replaceFile: "Reemplazar archivo PDF",
           selectOrDrop: "Selecciona PDF o sueltalo aqui",
+          uploadHint: "Procesamiento local en navegador. Sin subida obligatoria.",
           loadingPreview: "Cargando vista previa del PDF...",
           filePreviewTitle: "Vista del archivo",
           noFileSelected: "Aun no hay archivo seleccionado.",
@@ -118,6 +119,11 @@ export function CompressPdfTool() {
           compressingButton: "Comprimiendo PDF...",
           resultTitle: "Compresion lista",
           resultSummary: "Resultado",
+          resultMetrics: {
+            saved: "reduccion",
+            original: "original",
+            optimized: "optimizado"
+          },
           downloadOptimized: "Descargar PDF optimizado",
           continueWith: "Continuar con",
           trustTitle: "Seguro. Privado. Bajo tu control.",
@@ -136,7 +142,7 @@ export function CompressPdfTool() {
             merge: "Unir PDF",
             split: "Dividir PDF",
             rotate: "Rotar PDF",
-            protect: "Proteger PDF"
+            jpg: "PDF a JPG"
           },
           invalidFile: (name: string) => `Solo se permiten archivos PDF. Archivo invalido: ${name}`,
           tooLarge: (name: string) => `El tamano maximo es ${formatFileLimit()}. Muy grande: ${name}`,
@@ -148,6 +154,7 @@ export function CompressPdfTool() {
       : {
           replaceFile: "Replace PDF file",
           selectOrDrop: "Select PDF or drop it here",
+          uploadHint: "Browser-first processing. No mandatory upload.",
           loadingPreview: "Loading PDF preview...",
           filePreviewTitle: "File preview",
           noFileSelected: "No file selected yet.",
@@ -160,6 +167,11 @@ export function CompressPdfTool() {
           compressingButton: "Compressing PDF...",
           resultTitle: "Compression complete",
           resultSummary: "Result",
+          resultMetrics: {
+            saved: "saved",
+            original: "original",
+            optimized: "optimized"
+          },
           downloadOptimized: "Download optimized PDF",
           continueWith: "Continue with",
           trustTitle: "Secure. Private. Under your control.",
@@ -178,7 +190,7 @@ export function CompressPdfTool() {
             merge: "Merge PDF",
             split: "Split PDF",
             rotate: "Rotate PDF",
-            protect: "Protect PDF"
+            jpg: "PDF to JPG"
           },
           invalidFile: (name: string) => `Only PDF files are allowed. Invalid file: ${name}`,
           tooLarge: (name: string) => `Max file size is ${formatFileLimit()}. Too large: ${name}`,
@@ -283,7 +295,7 @@ export function CompressPdfTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -309,7 +321,7 @@ export function CompressPdfTool() {
           setIsDragging(false);
           void handleIncomingFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-5 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -318,6 +330,7 @@ export function CompressPdfTool() {
         <span className="block text-sm font-semibold text-slate-700">
           {file ? copy.replaceFile : copy.selectOrDrop}
         </span>
+        <span className="mt-1.5 block text-xs text-slate-500">{copy.uploadHint}</span>
       </button>
 
       {isPreparingFile ? (
@@ -330,7 +343,7 @@ export function CompressPdfTool() {
         <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h2 className="text-sm font-semibold text-slate-900">{copy.filePreviewTitle}</h2>
 
@@ -365,7 +378,7 @@ export function CompressPdfTool() {
                   <img
                     src={preview.thumbnailDataUrl}
                     alt={copy.previewAlt(file.name)}
-                    className="mx-auto h-auto w-full max-w-[340px] object-contain"
+                    className="mx-auto h-auto w-full max-w-[460px] object-contain"
                   />
                 </div>
               ) : null}
@@ -373,7 +386,7 @@ export function CompressPdfTool() {
           )}
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.settingsTitle}</h2>
           <div className="mt-3 space-y-2">
             {compressionOptions.map((option) => (
@@ -405,23 +418,34 @@ export function CompressPdfTool() {
       </div>
 
       {result ? (
-        <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <h2 className="text-base font-bold text-emerald-900">{copy.resultTitle}</h2>
-
-          <div className="mt-3 rounded-xl border border-emerald-300 bg-white p-3">
+        <section className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="rounded-xl border border-emerald-300 bg-white p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">{copy.resultSummary}</p>
-            <div className="mt-1.5 flex items-end gap-3">
-              <span className="text-3xl font-extrabold leading-none text-emerald-800">{result.savedPercent}%</span>
-              <span className="pb-0.5 text-sm font-medium text-emerald-700">
-                {formatSize(result.originalSize)} -&gt; {formatSize(result.compressedSize)}
+            <div className="mt-1.5 flex flex-wrap items-end justify-between gap-2">
+              <h2 className="text-base font-bold text-emerald-900">{copy.resultTitle}</h2>
+              <span className="text-3xl font-extrabold leading-none text-emerald-800">
+                {result.savedPercent}% {copy.resultMetrics.saved}
               </span>
+            </div>
+            <div className="mt-3 grid gap-2 text-xs text-slate-700 sm:grid-cols-2 lg:grid-cols-3">
+              <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <span className="font-semibold">{copy.resultMetrics.original}: </span>
+                {formatSize(result.originalSize)}
+              </p>
+              <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <span className="font-semibold">{copy.resultMetrics.optimized}: </span>
+                {formatSize(result.compressedSize)}
+              </p>
+              <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 sm:col-span-2 lg:col-span-1">
+                <span className="font-semibold">{copy.downloadOptimized}</span>
+              </p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => downloadBlob(result.outputBlob, result.outputFileName)}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
+            className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-5 py-3.5 text-base font-bold text-white transition hover:bg-brand-700"
           >
             {copy.downloadOptimized}
           </button>
@@ -432,7 +456,7 @@ export function CompressPdfTool() {
               <Link href="/tools/merge-pdf" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700">{copy.continueCards.merge}</Link>
               <Link href="/tools/split-pdf" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700">{copy.continueCards.split}</Link>
               <Link href="/tools/rotate-pdf" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700">{copy.continueCards.rotate}</Link>
-              <Link href="/tools/protect-pdf" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700">{copy.continueCards.protect}</Link>
+              <Link href="/tools/pdf-to-jpg" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700">{copy.continueCards.jpg}</Link>
             </div>
           </div>
 

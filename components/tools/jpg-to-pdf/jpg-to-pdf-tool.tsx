@@ -35,6 +35,8 @@ export function JpgToPdfTool() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const itemsRef = useRef<UploadItem[]>([]);
 
@@ -43,12 +45,13 @@ export function JpgToPdfTool() {
       ? {
           uploadMore: "Agregar mas imagenes",
           uploadFirst: "Selecciona imagenes o sueltalas aqui",
+          uploadHint: "JPG y PNG compatibles. Ordena antes de convertir.",
           filePreview: "Vista del archivo",
           clearAll: "Limpiar todo",
           noFiles: "Aun no hay archivos agregados.",
           remove: "Quitar",
           options: "Opciones de conversion",
-          optionsHint: "El orden final del PDF sigue el orden de la lista de la izquierda.",
+          optionsHint: "El orden final del PDF sigue el orden de las tarjetas. Puedes arrastrar para reordenar.",
           up: "Subir",
           down: "Bajar",
           convertBusy: "Convirtiendo...",
@@ -62,12 +65,13 @@ export function JpgToPdfTool() {
       : {
           uploadMore: "Add more images",
           uploadFirst: "Select images or drop them here",
+          uploadHint: "JPG and PNG supported. Set order before conversion.",
           filePreview: "File preview",
           clearAll: "Clear all",
           noFiles: "No files added yet.",
           remove: "Remove",
           options: "Convert options",
-          optionsHint: "Final PDF order follows the file order on the left.",
+          optionsHint: "Final PDF order follows card order. You can drag cards to reorder.",
           up: "Up",
           down: "Down",
           convertBusy: "Converting...",
@@ -155,6 +159,22 @@ export function JpgToPdfTool() {
     });
   };
 
+  const reorderByIds = (sourceId: string, targetId: string) => {
+    setItems((current) => {
+      const sourceIndex = current.findIndex((item) => item.id === sourceId);
+      const targetIndex = current.findIndex((item) => item.id === targetId);
+
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+        return current;
+      }
+
+      const updated = [...current];
+      const [moved] = updated.splice(sourceIndex, 1);
+      updated.splice(targetIndex, 0, moved);
+      return updated;
+    });
+  };
+
   const onConvert = async () => {
     if (items.length === 0) {
       setError(copy.uploadBefore);
@@ -187,7 +207,7 @@ export function JpgToPdfTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -213,7 +233,7 @@ export function JpgToPdfTool() {
           setIsDragging(false);
           handleFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-5 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -222,6 +242,7 @@ export function JpgToPdfTool() {
         <span className="block text-sm font-semibold text-slate-700">
           {items.length > 0 ? copy.uploadMore : copy.uploadFirst}
         </span>
+        <span className="mt-1.5 block text-xs text-slate-500">{copy.uploadHint}</span>
       </button>
 
       {error ? (
@@ -234,7 +255,7 @@ export function JpgToPdfTool() {
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">{copy.filePreview}</h2>
@@ -256,14 +277,43 @@ export function JpgToPdfTool() {
               {items.map((item, index) => (
                 <li
                   key={item.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white p-2"
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggingId(item.id);
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", item.id);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setDragOverId(item.id);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const sourceId = draggingId ?? event.dataTransfer.getData("text/plain");
+                    if (sourceId) {
+                      reorderByIds(sourceId, item.id);
+                    }
+                    setDragOverId(null);
+                    setDraggingId(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragOverId(null);
+                    setDraggingId(null);
+                  }}
+                  className={`flex items-center justify-between gap-2 rounded-lg border bg-white p-2 transition ${
+                    draggingId === item.id
+                      ? "cursor-grabbing border-brand-600 bg-brand-50/70"
+                      : dragOverId === item.id
+                        ? "border-brand-500 bg-brand-50"
+                        : "cursor-grab border-slate-200"
+                  }`}
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.previewUrl}
                       alt={item.file.name}
-                      className="h-12 w-10 rounded border border-slate-200 object-cover"
+                      className="h-14 w-12 rounded border border-slate-200 object-cover"
                     />
                     <div className="min-w-0">
                       <p className="truncate text-xs font-semibold text-slate-900">
@@ -285,7 +335,7 @@ export function JpgToPdfTool() {
           )}
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.options}</h2>
           <p className="mt-1 text-xs text-slate-600">{copy.optionsHint}</p>
 

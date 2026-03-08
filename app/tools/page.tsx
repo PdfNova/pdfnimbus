@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { toolRegistry, type ToolCategory } from "@/lib/tools-registry";
 
 export const metadata: Metadata = {
   title: "All Tools",
-  description: "Explore the full PDFNova tools ecosystem across PDF, image, document, and QR categories."
+  description: "Explore the full PDFNimbus tools ecosystem across PDF, image, document, and QR categories."
 };
 
 const categoryLabels: Record<ToolCategory, string> = {
@@ -57,8 +57,8 @@ export default function ToolsPage() {
   return (
     <main className="mx-auto w-full max-w-[1500px] px-4 py-4 sm:px-6 sm:py-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">PDFNova ecosystem</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">All PDFNova Tools</h1>
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">PDFNimbus ecosystem</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">All PDFNimbus Tools</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-600 sm:text-base">
           One place to discover active tools and upcoming categories across PDF, image, document, and QR workflows.
         </p>
@@ -91,4 +91,5 @@ export default function ToolsPage() {
     </main>
   );
 }
+
 

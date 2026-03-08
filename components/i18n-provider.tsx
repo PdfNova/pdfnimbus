@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { dictionaries, type Language, type TranslationKey } from "@/lib/i18n";
@@ -15,7 +15,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("pdfnova_lang");
+    const saved = window.localStorage.getItem("PDFNimbus_lang");
     if (saved === "en" || saved === "es") {
       setLanguageState(saved);
     }
@@ -24,7 +24,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("pdfnova_lang", lang);
+      window.localStorage.setItem("PDFNimbus_lang", lang);
     }
   };
 
@@ -47,3 +47,4 @@ export function useTranslation() {
   }
   return context;
 }
+

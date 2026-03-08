@@ -11,7 +11,8 @@ const primaryNavKeys = [
   { href: "/tools/compress-pdf", key: "navCompress" as const },
   { href: "/tools/split-pdf", key: "navSplit" as const },
   { href: "/tools/pdf-to-jpg", key: "navConvert" as const },
-  { href: "/tools/qr-generator", key: "navQr" as const }
+  { href: "/tools/qr-generator", key: "navQr" as const },
+  { href: "/tools", key: "navAllTools" as const }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -24,31 +25,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1620px] items-center gap-3 px-3 py-2 sm:px-4 lg:px-5">
+        <div className="mx-auto flex w-full max-w-[1620px] items-center gap-2 px-2 py-1.5 sm:px-3 lg:px-4">
           <Link
             href="/"
-            className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-lg font-extrabold tracking-tight text-slate-900 transition hover:border-brand-300"
+            className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-900 transition hover:border-brand-300"
           >
-            {brand.name}
+            <span className="block text-xl font-black leading-none tracking-tight">{brand.name}</span>
+            <span className="hidden text-[10px] font-semibold uppercase tracking-wide text-slate-500 xl:block">
+              {t("browserFirst")}
+            </span>
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1.5 lg:flex">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex">
             {primaryNavKeys.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
               >
                 {t(item.key)}
               </Link>
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5">
-            <LanguageSelector />
+          <div className="ml-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1">
+            <LanguageSelector compact />
 
             <details className="group relative">
-              <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-xs font-semibold uppercase tracking-wide text-slate-700 transition hover:border-brand-500 hover:text-brand-700">
+              <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold uppercase tracking-wide text-slate-700 transition hover:border-brand-500 hover:text-brand-700">
                 <span>{t("toolsMenu")}</span>
                 <span className="grid grid-cols-3 gap-0.5">
                   {Array.from({ length: 9 }).map((_, i) => (
@@ -57,7 +61,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </span>
               </summary>
 
-              <div className="invisible absolute right-0 mt-2 w-[420px] rounded-xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition group-open:visible group-open:opacity-100">
+              <div className="invisible absolute right-0 mt-2 w-[min(95vw,560px)] rounded-xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition group-open:visible group-open:opacity-100">
+                <header className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-900">{t("toolsMenu")}</p>
+                  <p className="mt-1 text-xs text-slate-600">{t("toolsMenuHint")}</p>
+                </header>
+
                 <div className="space-y-3">
                   <section>
                     <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -145,8 +154,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {children}
 
-      <footer className="mt-6 border-t border-slate-200 bg-white">
-        <div className="mx-auto grid w-full max-w-[1620px] gap-5 px-3 py-7 sm:grid-cols-2 sm:px-4 lg:grid-cols-4 lg:px-5">
+      <footer className="mt-5 border-t border-slate-200 bg-white">
+        <div className="mx-auto grid w-full max-w-[1620px] gap-5 px-2 py-7 sm:grid-cols-2 sm:px-3 lg:grid-cols-4 lg:px-4">
           <section>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">{t("product")}</h2>
             <ul className="mt-2 space-y-1.5 text-sm text-slate-600">

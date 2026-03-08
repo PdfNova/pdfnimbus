@@ -1,9 +1,10 @@
-export const es = {
+﻿export const es = {
   navMerge: "Unir",
   navCompress: "Comprimir",
   navSplit: "Dividir",
   navConvert: "Convertir",
   navQr: "QR",
+  navAllTools: "Todas",
   allTools: "Todas las herramientas",
   product: "Producto",
   tools: "Herramientas",
@@ -19,14 +20,14 @@ export const es = {
   heroSubtitle: "Une, comprime, divide y convierte archivos directamente en tu navegador.",
   chooseTool: "Elegir herramienta",
   popularTools: "Herramientas populares",
-  whyPdfNova: "Por que PDFNova",
+  whyPDFNimbus: "Por que PDFNimbus",
   allActiveTools: "Todas las herramientas activas",
   securePrivate: "Seguro. Privado. Bajo tu control.",
   browserFirst: "Procesamiento en navegador",
   noUploads: "Sin subidas",
   fastProcessing: "Procesamiento rapido",
   privacyFirst: "Privacidad primero",
-  pdfnovaTools: "Herramientas PDFNova",
+  PDFNimbusTools: "Herramientas PDFNimbus",
   viewAll: "Ver todo",
   mergePdf: "Unir PDF",
   compressPdf: "Comprimir PDF",
@@ -43,8 +44,10 @@ export const es = {
   imageToolsLabel: "Herramientas de imagen",
   qrToolsLabel: "Herramientas QR",
   comingSoon: "Pronto",
-  ecosystemLabel: "Ecosistema PDFNova",
+  ecosystemLabel: "Ecosistema PDFNimbus",
   languageShort: "Idioma",
+  toolsMenuHint: "Cambia entre herramientas activas rapidamente",
+  faqHeading: "Preguntas frecuentes",
   toolMergePdfLabel: "Unir PDF",
   toolMergePdfDescription: "Combina varios PDF en un solo documento.",
   toolCompressPdfLabel: "Comprimir PDF",
@@ -70,3 +73,4 @@ export const es = {
   toolVcardQrLabel: "vCard QR",
   toolVcardQrDescription: "Comparte contactos en formato QR."
 } as const;
+

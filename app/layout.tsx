@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Script from "next/script";
 import { brand } from "@/lib/brand";
 import { GA_MEASUREMENT_ID } from "@/lib/analytics";
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         url: "/og-image.svg",
         width: 1200,
         height: 630,
-        alt: "PDFNova"
+        alt: "PDFNimbus"
       }
     ]
   }
@@ -62,3 +62,4 @@ export default function RootLayout({
     </html>
   );
 }
+

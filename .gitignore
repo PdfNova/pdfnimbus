@@ -35,3 +35,7 @@ next-env.d.ts
 # local uploads / temp
 /tmp
 *.tmp
+
+# local testing files (DO NOT COMMIT)
+app/pdf_pruebas/
+tmp-split-test.pdf

@@ -1,9 +1,10 @@
-export const en = {
+﻿export const en = {
   navMerge: "Merge",
   navCompress: "Compress",
   navSplit: "Split",
   navConvert: "Convert",
   navQr: "QR",
+  navAllTools: "All tools",
   allTools: "All tools",
   product: "Product",
   tools: "Tools",
@@ -19,14 +20,14 @@ export const en = {
   heroSubtitle: "Merge, compress, split, and convert files directly in your browser.",
   chooseTool: "Choose a tool",
   popularTools: "Popular tools",
-  whyPdfNova: "Why PDFNova",
+  whyPDFNimbus: "Why PDFNimbus",
   allActiveTools: "All active tools",
   securePrivate: "Secure. Private. Under your control.",
   browserFirst: "Browser-first processing",
   noUploads: "No uploads",
   fastProcessing: "Fast processing",
   privacyFirst: "Privacy-first",
-  pdfnovaTools: "PDFNova Tools",
+  PDFNimbusTools: "PDFNimbus Tools",
   viewAll: "View all",
   mergePdf: "Merge PDF",
   compressPdf: "Compress PDF",
@@ -43,8 +44,10 @@ export const en = {
   imageToolsLabel: "Image tools",
   qrToolsLabel: "QR tools",
   comingSoon: "Soon",
-  ecosystemLabel: "PDFNova ecosystem",
+  ecosystemLabel: "PDFNimbus ecosystem",
   languageShort: "Language",
+  toolsMenuHint: "Switch between active tools quickly",
+  faqHeading: "Frequently asked questions",
   toolMergePdfLabel: "Merge PDF",
   toolMergePdfDescription: "Combine multiple PDFs into one document.",
   toolCompressPdfLabel: "Compress PDF",
@@ -70,3 +73,4 @@ export const en = {
   toolVcardQrLabel: "vCard QR",
   toolVcardQrDescription: "Share contact cards using QR format."
 } as const;
+

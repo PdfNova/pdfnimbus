@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { toolRegistry } from "@/lib/tools-registry";
@@ -59,7 +59,7 @@ export default function HomePage() {
       </section>
 
       <section className="mt-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <h2 className="text-lg font-semibold text-slate-900">{t("whyPdfNova")}</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{t("whyPDFNimbus")}</h2>
         <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
           {whyCards.map((card, index) => (
             <article key={card.title} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -83,3 +83,4 @@ export default function HomePage() {
     </main>
   );
 }
+

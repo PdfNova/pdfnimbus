@@ -185,6 +185,7 @@ export function SplitPdfTool() {
       ? {
           replaceFile: "Reemplazar archivo PDF",
           selectOrDrop: "Selecciona PDF o sueltalo aqui",
+          uploadHint: "Procesamiento local en navegador.",
           filePreview: "Vista del archivo",
           loadingDetails: "Cargando detalles y miniaturas del PDF...",
           noFileAdded: "Aun no hay archivo agregado.",
@@ -238,6 +239,7 @@ export function SplitPdfTool() {
       : {
           replaceFile: "Replace PDF file",
           selectOrDrop: "Select PDF or drop it here",
+          uploadHint: "Browser-first local processing.",
           filePreview: "File preview",
           loadingDetails: "Loading PDF details and thumbnails...",
           noFileAdded: "No file added yet.",
@@ -477,7 +479,7 @@ export function SplitPdfTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -502,7 +504,7 @@ export function SplitPdfTool() {
           setIsDragging(false);
           void handleIncomingFiles(Array.from(event.dataTransfer.files));
         }}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-5 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -511,6 +513,7 @@ export function SplitPdfTool() {
         <span className="block text-sm font-semibold text-slate-700">
           {file ? copy.replaceFile : copy.selectOrDrop}
         </span>
+        <span className="mt-1.5 block text-xs text-slate-500">{copy.uploadHint}</span>
       </button>
 
       {error ? (
@@ -525,7 +528,7 @@ export function SplitPdfTool() {
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h2 className="text-sm font-semibold text-slate-900">{copy.filePreview}</h2>
           <p className="mt-1 text-xs text-slate-600">
@@ -537,7 +540,7 @@ export function SplitPdfTool() {
           </p>
 
           {pagePreviews.length > 0 ? (
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
               {pagePreviews.map((preview) => {
                 const isSelected = selectedPages.includes(preview.pageNumber);
                 const isInRange = rangePageSet.has(preview.pageNumber);
@@ -580,7 +583,7 @@ export function SplitPdfTool() {
           ) : null}
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.settingsTitle}</h2>
 
           <div className="mt-3 grid gap-2">

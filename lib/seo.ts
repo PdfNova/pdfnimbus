@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -25,16 +25,17 @@ export function buildToolMetadata({
       title,
       description,
       url: canonicalPath,
-      siteName: "PDFNova",
+      siteName: "PDFNimbus",
       type: "website",
       images: [
         {
           url: "/og-image.svg",
           width: 1200,
           height: 630,
-          alt: "PDFNova"
+          alt: "PDFNimbus"
         }
       ]
     }
   };
 }
+

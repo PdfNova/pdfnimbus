@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { PdfToJpgTool } from "@/components/tools/pdf-to-jpg/pdf-to-jpg-tool";
 import { ActiveToolPageFrame } from "@/components/tools/shared/active-tool-page-frame";
 import { buildToolMetadata } from "@/lib/seo";
@@ -35,7 +35,7 @@ const faqJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "PDFNova PDF to JPG",
+  name: "PDFNimbus PDF to JPG",
   description: toolDescription,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web"
@@ -66,6 +66,29 @@ export default function PdfToJpgPage() {
           en: "Upload your PDF and export all pages as JPG files with one click.",
           es: "Sube tu PDF y exporta todas las paginas como archivos JPG con un clic."
         }}
+        introParagraphs={[
+          {
+            en: "Convert PDF to JPG online when you need image files for slides, social media, previews, or design workflows. Each page can be exported as a separate JPG for flexible reuse.",
+            es: "Convierte PDF a JPG online cuando necesites imagenes para presentaciones, redes, previsualizaciones o flujos de diseno. Cada pagina puede exportarse como JPG separado para mayor flexibilidad."
+          },
+          {
+            en: "The tool runs in a browser-first flow for typical use, with clear download options for single files or multi-page outputs.",
+            es: "La herramienta funciona con flujo browser-first para uso normal, con opciones claras de descarga para salida unica o multipagina."
+          }
+        ]}
+        benefitsTitle={{ en: "Why use this PDF to JPG converter", es: "Por que usar este convertidor PDF a JPG" }}
+        benefitsItems={[
+          { en: "One JPG per PDF page", es: "Un JPG por cada pagina PDF" },
+          { en: "Clear single or ZIP download flow", es: "Flujo claro de descarga individual o ZIP" },
+          { en: "Preview and page count before conversion", es: "Vista previa y total de paginas antes de convertir" },
+          { en: "Browser-first processing for typical use", es: "Procesamiento browser-first para uso normal" }
+        ]}
+        relatedToolsTitle={{ en: "Related conversion tools", es: "Herramientas de conversion relacionadas" }}
+        relatedTools={[
+          { href: "/tools/jpg-to-pdf", label: { en: "JPG to PDF", es: "JPG a PDF" } },
+          { href: "/tools/compress-image", label: { en: "Compress Image", es: "Comprimir imagen" } },
+          { href: "/tools/merge-pdf", label: { en: "Merge PDF", es: "Unir PDF" } }
+        ]}
         faqItems={[
           {
             question: {
@@ -86,6 +109,26 @@ export default function PdfToJpgPage() {
               en: "For typical use, processing happens in your browser and files are not stored on our servers.",
               es: "Para uso normal, el procesamiento ocurre en tu navegador y no guardamos tus archivos."
             }
+          },
+          {
+            question: {
+              en: "Can I download all pages at once?",
+              es: "Puedo descargar todas las paginas a la vez?"
+            },
+            answer: {
+              en: "Yes. When multiple JPG files are generated, you can download them together as a ZIP.",
+              es: "Si. Cuando se generan varios JPG, puedes descargarlos juntos como ZIP."
+            }
+          },
+          {
+            question: {
+              en: "Does it work on mobile browsers?",
+              es: "Funciona en navegadores moviles?"
+            },
+            answer: {
+              en: "Yes, on modern mobile browsers, with faster handling on desktop for larger files.",
+              es: "Si, en navegadores moviles modernos, con procesamiento mas comodo en escritorio para archivos grandes."
+            }
           }
         ]}
       >
@@ -94,3 +137,4 @@ export default function PdfToJpgPage() {
     </>
   );
 }
+

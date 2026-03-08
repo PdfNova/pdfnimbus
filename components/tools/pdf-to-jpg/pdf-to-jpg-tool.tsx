@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import JSZip from "jszip";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { pdfToJpgFiles } from "@/lib/pdf/pdf-to-jpg";
 import { formatFileLimit, isFileTooLarge } from "@/lib/upload-constraints";
@@ -14,6 +15,11 @@ type PdfPreview = {
   pageCount: number;
 };
 
+type ConversionOutput = {
+  name: string;
+  blob: Blob;
+};
+
 function isPdfFile(file: File) {
   return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
@@ -22,10 +28,15 @@ function formatMb(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function wait(ms: number) {
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function generatePdfPreview(file: File): Promise<PdfPreview> {
@@ -62,6 +73,7 @@ export function PdfToJpgTool() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PdfPreview | null>(null);
+  const [outputs, setOutputs] = useState<ConversionOutput[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -73,6 +85,7 @@ export function PdfToJpgTool() {
       ? {
           replaceFile: "Reemplazar archivo PDF",
           selectOrDrop: "Selecciona PDF o sueltalo aqui",
+          uploadHint: "Convierte paginas en JPG sin subir archivos.",
           loadingPreview: "Cargando vista previa del PDF...",
           filePreview: "Vista del archivo",
           noFile: "Aun no hay archivo agregado.",
@@ -80,21 +93,26 @@ export function PdfToJpgTool() {
           pages: "paginas",
           previewAlt: (name: string) => `Vista previa de ${name}`,
           options: "Opciones de conversion",
-          optionsHint: "Todas las paginas se exportan como imagenes JPG.",
+          optionsHint: "Procesamiento local en navegador. Sin almacenamiento en servidor.",
           clear: "Limpiar",
           convertBusy: "Convirtiendo...",
           convertCta: "Convertir a JPG",
+          downloadOne: "Descargar imagen",
+          downloadAllZip: "Descargar todo en ZIP",
+          outputTitle: "Resultados de conversion",
+          outputReady: (count: number) => `${count} archivo(s) JPG listos para descargar.`,
           invalid: (name: string) => `Solo se permiten PDF. Invalido: ${name}`,
           tooLarge: (name: string) => `Tamano maximo ${formatFileLimit()}. Muy grande: ${name}`,
           readFailed: "No se pudo leer este PDF. Prueba con otro valido.",
           uploadBefore: "Sube un PDF antes de convertir.",
           noPages: "No se encontraron paginas en este PDF.",
           convertFailed: "La conversion fallo. Prueba con otro PDF.",
-          done: (count: number, total: string) => `Listo. ${count} archivo(s) JPG descargado(s) (${total} en total).`
+          done: (count: number, total: string) => `Listo. ${count} archivo(s) JPG generado(s) (${total} en total).`
         }
       : {
           replaceFile: "Replace PDF file",
           selectOrDrop: "Select PDF or drop it here",
+          uploadHint: "Convert pages to JPG without uploading files.",
           loadingPreview: "Loading PDF preview...",
           filePreview: "File preview",
           noFile: "No file added yet.",
@@ -102,23 +120,28 @@ export function PdfToJpgTool() {
           pages: "pages",
           previewAlt: (name: string) => `Preview of ${name}`,
           options: "Convert options",
-          optionsHint: "All pages are exported as JPG images.",
+          optionsHint: "Browser-first local processing. No server storage.",
           clear: "Clear",
           convertBusy: "Converting...",
           convertCta: "Convert to JPG",
+          downloadOne: "Download image",
+          downloadAllZip: "Download all as ZIP",
+          outputTitle: "Conversion outputs",
+          outputReady: (count: number) => `${count} JPG file(s) ready to download.`,
           invalid: (name: string) => `Only PDF files are allowed. Invalid file: ${name}`,
           tooLarge: (name: string) => `Max file size is ${formatFileLimit()}. Too large: ${name}`,
           readFailed: "Could not read this PDF file. Please try another valid PDF.",
           uploadBefore: "Please upload a PDF file before converting.",
           noPages: "No pages were found in this PDF.",
           convertFailed: "Conversion failed. Please try another PDF file.",
-          done: (count: number, total: string) => `Done. ${count} JPG file(s) downloaded (${total} total).`
+          done: (count: number, total: string) => `Done. ${count} JPG file(s) generated (${total} total).`
         };
 
   const loadSelectedFile = async (selected: File) => {
     setIsPreparingFile(true);
     setError(null);
     setSuccessMessage(null);
+    setOutputs([]);
 
     try {
       const nextPreview = await generatePdfPreview(selected);
@@ -142,6 +165,7 @@ export function PdfToJpgTool() {
     setIsConverting(true);
     setError(null);
     setSuccessMessage(null);
+    setOutputs([]);
 
     try {
       const jpgBlobs = await pdfToJpgFiles(file);
@@ -152,28 +176,36 @@ export function PdfToJpgTool() {
       }
 
       const baseName = file.name.replace(/\.pdf$/i, "");
+      const nextOutputs = jpgBlobs.map((blob, index) => ({
+        blob,
+        name: `${baseName}-page-${index + 1}.jpg`
+      }));
 
-      for (let index = 0; index < jpgBlobs.length; index += 1) {
-        const blob = jpgBlobs[index];
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${baseName}-page-${index + 1}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-
-        await wait(120);
-      }
-
+      setOutputs(nextOutputs);
       const totalOutputBytes = jpgBlobs.reduce((sum, blob) => sum + blob.size, 0);
       setSuccessMessage(copy.done(jpgBlobs.length, formatMb(totalOutputBytes)));
+
+      if (nextOutputs.length === 1) {
+        downloadBlob(nextOutputs[0].blob, nextOutputs[0].name);
+      }
     } catch {
       setError(copy.convertFailed);
     } finally {
       setIsConverting(false);
     }
+  };
+
+  const downloadZip = async () => {
+    if (outputs.length === 0) return;
+
+    const zip = new JSZip();
+    outputs.forEach((item) => {
+      zip.file(item.name, item.blob);
+    });
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const baseName = file?.name.replace(/\.pdf$/i, "") ?? "pdf-images";
+    downloadBlob(zipBlob, `${baseName}-jpg-pages.zip`);
   };
 
   const validateAndLoad = (selected: File | undefined) => {
@@ -191,7 +223,7 @@ export function PdfToJpgTool() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <input
         ref={fileInputRef}
         type="file"
@@ -218,7 +250,7 @@ export function PdfToJpgTool() {
           const selected = Array.from(event.dataTransfer.files)[0];
           validateAndLoad(selected);
         }}
-        className={`w-full rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+        className={`w-full rounded-xl border-2 border-dashed px-4 py-5 text-center transition ${
           isDragging
             ? "border-brand-600 bg-brand-50"
             : "border-slate-300 bg-slate-50 hover:border-brand-500 hover:bg-brand-50"
@@ -227,6 +259,7 @@ export function PdfToJpgTool() {
         <span className="block text-sm font-semibold text-slate-700">
           {file ? copy.replaceFile : copy.selectOrDrop}
         </span>
+        <span className="mt-1.5 block text-xs text-slate-500">{copy.uploadHint}</span>
       </button>
 
       {isPreparingFile ? (
@@ -245,7 +278,7 @@ export function PdfToJpgTool() {
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(280px,320px)] 2xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h2 className="text-sm font-semibold text-slate-900">{copy.filePreview}</h2>
           {!file ? (
@@ -264,25 +297,47 @@ export function PdfToJpgTool() {
                   <img
                     src={preview.thumbnailDataUrl}
                     alt={copy.previewAlt(file.name)}
-                    className="mx-auto h-auto w-full max-w-[340px] object-contain"
+                    className="mx-auto h-auto w-full max-w-[460px] object-contain"
                   />
                 </div>
               ) : null}
             </div>
           )}
+
+          {outputs.length > 0 ? (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+              <h3 className="text-sm font-semibold text-slate-900">{copy.outputTitle}</h3>
+              <p className="mt-1 text-xs text-slate-600">{copy.outputReady(outputs.length)}</p>
+              <ul className="mt-2 max-h-48 space-y-1 overflow-auto text-xs text-slate-700">
+                {outputs.map((item) => (
+                  <li key={item.name} className="flex items-center justify-between gap-2 rounded border border-slate-200 px-2 py-1.5">
+                    <span className="truncate">{item.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => downloadBlob(item.blob, item.name)}
+                      className="rounded border border-slate-300 px-2 py-1 font-medium text-slate-700 hover:border-brand-500 hover:text-brand-700"
+                    >
+                      {copy.downloadOne}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-3">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-3 lg:sticky lg:top-20">
           <h2 className="text-sm font-semibold text-slate-900">{copy.options}</h2>
           <p className="mt-1 text-xs text-slate-600">{copy.optionsHint}</p>
 
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 grid gap-2">
             {file ? (
               <button
                 type="button"
                 onClick={() => {
                   setFile(null);
                   setPreview(null);
+                  setOutputs([]);
                   setError(null);
                   setSuccessMessage(null);
                 }}
@@ -295,9 +350,24 @@ export function PdfToJpgTool() {
               type="button"
               onClick={onConvert}
               disabled={isConverting || !file || isPreparingFile}
-              className="inline-flex flex-1 items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isConverting ? copy.convertBusy : copy.convertCta}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (outputs.length === 1) {
+                  downloadBlob(outputs[0].blob, outputs[0].name);
+                  return;
+                }
+                void downloadZip();
+              }}
+              disabled={outputs.length === 0}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {outputs.length <= 1 ? copy.downloadOne : copy.downloadAllZip}
             </button>
           </div>
         </aside>
